@@ -1,14 +1,22 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
+import { RouterModule, Routes } from '@angular/router';
 
-import { AdminRoutingModule } from './admin-routing-module';
+import { CreateUser } from './create-user/create-user';
+import { Dashboard } from './dashboard/dashboard';
 
+const adminRoutes: Routes = [
+  { path: 'create-user', component: CreateUser },
+  { path: 'dashboard', component: Dashboard, title: 'Dashboard' },
+
+];
 
 @NgModule({
-  declarations: [],
   imports: [
     CommonModule,
-    AdminRoutingModule
+    ReactiveFormsModule,
+    RouterModule.forChild(adminRoutes),
   ]
 })
-export class AdminModule { }
+export class AdminModule {}
