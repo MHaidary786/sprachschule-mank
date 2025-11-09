@@ -7,15 +7,13 @@ import { Courses } from './courses/courses';
 import { Login } from './login/login';
 
 @NgModule({
-  declarations: [
+  imports: [
+    CommonModule,
+    PublicRoutingModule,
     Home,
     Contact,
     Courses,
     Login
-  ],
-  imports: [
-    CommonModule,
-    PublicRoutingModule
   ]
 })
 export class PublicModule { }

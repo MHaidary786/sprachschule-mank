@@ -1,4 +1,3 @@
-// server/models/Student.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -6,8 +5,7 @@ const studentSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  courses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }], // enrolled courses
-  createdAt: { type: Date, default: Date.now }
+  courses: [{ type: String }] // optional: store course IDs or names
 });
 
 // Hash password before saving
@@ -17,7 +15,7 @@ studentSchema.pre('save', async function(next) {
   next();
 });
 
-// Compare entered password with hashed password
+// Compare password helper
 studentSchema.methods.comparePassword = async function(password) {
   return bcrypt.compare(password, this.password);
 };

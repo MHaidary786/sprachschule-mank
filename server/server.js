@@ -7,12 +7,18 @@ const studentRoutes = require('./routes/studentRoutes');
 const teacherRoutes = require('./routes/teacherRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 
+const connectDB = require('./config/db');
+require('dotenv').config();
 
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+
+
+// Connect to database
+connectDB();
 
 // Routes
 app.use('/api/auth', authRoutes);
