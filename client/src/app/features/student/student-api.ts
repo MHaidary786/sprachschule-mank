@@ -24,4 +24,7 @@ export class StudentApiService {
   getAll(): Observable<Student[]> {
     return this.http.get<Student[]>('http://localhost:5000/api/student/getallstudents');
   }
+  getStudentByName(name: string): Observable<Student> {
+    return this.http.get<Student>(`http://localhost:5000/api/student/getstudent/${name}`);
+  }
 }

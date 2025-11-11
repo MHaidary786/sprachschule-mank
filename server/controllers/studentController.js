@@ -41,14 +41,13 @@ exports.getStudents = async (req, res) => {
 };
 
 
-exports.getStudentById = async (req, res) => {
+exports.getStudentByName = async (req, res) => {
   try {
-    const studentId = req.params.id;
-    const student = await Student.findById(studentId);
+    const studentName = req.params.name;
+    const student = await Student.findOne({ name: studentName }).select('-password');
     if (!student) {
       return res.status(404).json({ message: 'Student not found' });
     } 
-    delete student.password;
     res.json(student);
   } catch (error) {
     console.error(error);
