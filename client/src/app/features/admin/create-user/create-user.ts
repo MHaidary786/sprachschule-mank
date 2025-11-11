@@ -7,6 +7,7 @@ interface Student {
   name: string;
   email: string;
   password: string;
+  courses?: string[];
 }
 
 @Component({
@@ -25,6 +26,15 @@ interface Student {
         <label for="password">Password:</label>
         <input id="password" name="password" type="password" required [(ngModel)]="student.password" />
         <br />
+        <label for="courses">Courses:</label>
+        <select id="courses" name="courses" [(ngModel)]="student.courses" multiple>
+          <option value="english">English</option>
+          <option value="german">German</option>
+          <option value="spanish">Spanish</option>
+          <option value="french">French</option>
+          <option value="italian">Italian</option>
+        </select>
+        <br />
         <button type="submit" [disabled]="!studentForm.valid">Create User</button>
         <a routerLink="/admin/dashboard">Back to Dashboard</a>
       </form>
@@ -33,7 +43,7 @@ interface Student {
   styleUrls: ['./create-user.css'],
 })
 export class CreateUser {
-  student: Student = { name: '', email: '', password: '' };
+  student: Student = { name: '', email: '', password: '', courses: [] };
 
   constructor(private studentApiService: StudentApiService, private router: Router) {}
 

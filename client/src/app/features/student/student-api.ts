@@ -20,4 +20,8 @@ export class StudentApiService {
   createStudent(student: Student): Observable<Student> {
     return this.http.post<Student>(this.baseUrl, student);
   }
+
+  getAll(): Observable<Student[]> {
+    return this.http.get<Student[]>('http://localhost:5000/api/student/getallstudents');
+  }
 }

@@ -1,1 +1,32 @@
-<p>dashboard works!</p>
+<!-- /c:/Users/Byte Boss/Documents/Github/sprachschule-mank/client/src/app/features/admin/dashboard/dashboard.html -->
+<section class="admin-dashboard-students">
+    <h2>Students</h2>
+
+    <table class="students-table" role="table" aria-label="Students table">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Courses</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let student of students; let i = index" role="row">
+                <td role="cell">{{ student.name }}</td>
+                <td role="cell">{{ student.email }}</td>
+                <td role="cell">
+                    <ng-container *ngIf="student.courses && student.courses.length; else none">
+                        <ul class="course-list">
+                            <li *ngFor="let course of student.courses; trackBy: trackByIndex">{{ course }}</li>
+                        </ul>
+                    </ng-container>
+                    <ng-template #none>-</ng-template>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div *ngIf="!students || students.length === 0" class="empty-state">
+        No students available.
+    </div>
+</section>
