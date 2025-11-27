@@ -4,6 +4,7 @@ import { Component } from '@angular/core';
   selector: 'app-contact',
   imports: [],
   templateUrl: './contact.html',
+  standalone: true,
   styleUrl: './contact.css',
 })
 export class Contact {

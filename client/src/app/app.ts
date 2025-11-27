@@ -1,15 +1,14 @@
-import { Component, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, signal } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  // templateUrl: './app.html',
-  template : `
-    <main>
-      <router-outlet></router-outlet>
-    </main>
-    `,
-  standalone: false,
-  styleUrl: './app.css'
+  templateUrl: './app.html',
+  standalone: true,
+  styleUrl: './app.css',
+  imports: [RouterOutlet, CommonModule],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class App {
   protected readonly title = signal('client');

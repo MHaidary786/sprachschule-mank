@@ -12,6 +12,7 @@ interface Student {
 
 @Component({
   selector: 'app-create-user',
+  standalone: true,
   imports: [RouterModule, FormsModule],
   template: `
     <main>

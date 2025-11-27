@@ -14,6 +14,7 @@ interface Student {
 @Component({
   selector: 'app-admin-dashboard',
   imports: [RouterModule, CommonModule, FormsModule],
+  standalone: true,
   // templateUrl: './dashboard.html',
   template: `
     <main>
@@ -43,11 +44,14 @@ interface Student {
 
       <h3>Students List</h3>
       <ul>
-        <li *ngFor="let student of students; trackBy: trackByIndex">
+        @for (student of students; track student.name) 
+        {
+          <li>
           <strong>Name:</strong> {{ student.name }} <br />
           <strong>Email:</strong> {{ student.email }} <br />
           <strong>Courses:</strong> {{ student.courses?.join(', ') || 'None' }}
         </li>
+        }
       </ul>
     </main>
   `,
@@ -84,7 +88,7 @@ export class Dashboard implements OnInit {
     });
   }
 
-  trackByIndex(index: number, item: Student): number | string {
-    return item?.id ?? index;
-  }
+  // trackByIndex(index: number, item: Student): number | string {
+  //   return item?.id ?? index;
+  // }
 }
