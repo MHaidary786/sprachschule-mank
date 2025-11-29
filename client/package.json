@@ -33,6 +33,7 @@
     "@tailwindcss/cli": "^4.1.17",
     "@tailwindcss/postcss": "^4.1.17",
     "@tailwindplus/elements": "^1.0.18",
+    "material-icons": "^1.13.14",
     "postcss": "^8.5.6",
     "rxjs": "~7.8.0",
     "tailwind": "^4.0.0",
