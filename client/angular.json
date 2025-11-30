@@ -39,7 +39,8 @@
             "styles": [
               "src/custom-theme.scss",
               "src/styles.css"
-            ]
+            ],
+            "baseHref": "/sprachschule-mank/"
           },
           "configurations": {
             "production": {
