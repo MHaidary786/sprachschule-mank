@@ -29,7 +29,10 @@ export class AuthService {
   }
 
   login(credentials: any) {
-    return this.http.post('/api/auth/login', credentials).pipe(
+    if (credentials.remember) {
+      // Implement remember me functionality if needed
+    }
+    return this.http.post('/api/auth/login', {username: credentials.username, password: credentials.password}).pipe(
       tap((res: any) => localStorage.setItem(this.tokenKey, res.token))
     );
   }

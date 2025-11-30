@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { FormsModule } from '@angular/forms';
 
@@ -8,10 +8,14 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './login.html',
   styleUrls: ['./login.css'],
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
 })
 export class Login implements OnInit {
-  credentials = { username: '', password: '' };
+  credentials = { 
+    username: '', 
+    password: '', 
+    remember: false 
+  };
   role: string[] = [];
 
   constructor(private router: Router, private authService: AuthService) {}
@@ -21,9 +25,19 @@ export class Login implements OnInit {
   }
 
   login() {
+    console.log(this.credentials); /// Debugging line
     this.authService.login(this.credentials).subscribe({
       next: () => this.router.navigate(['/dashboard']),
       error: (err) => console.error(err),
     });
   }
+
+  // Carousel
+  carouselImages: string[] = [
+    '/assets/carousel/carousel1.jpg',
+    '/assets/carousel/carousel2.jpg',
+    '/assets/carousel/carousel3.jpg',
+  ];
+  currentImage = 0;
+  i: any;
 }

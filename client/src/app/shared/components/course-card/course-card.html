@@ -1,0 +1,49 @@
+<div
+  (click)="onCardClick()"
+  [class.cursor-not-allowed]="!course?.isOpenForEnrollment"
+  [class.opacity-75]="!course?.isOpenForEnrollment"
+  [class.hover:shadow-lg]="course?.isOpenForEnrollment"
+  [class.hover:scale-105]="course?.isOpenForEnrollment"
+  class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500 cursor-pointer transition-all duration-300"
+>
+  <img
+    [src]="course?.imageUrl"
+    [alt]="course?.title"
+    class="w-full h-40 object-cover rounded mb-4"
+  />
+
+  <h3 class="text-xl font-bold mb-2 text-gray-800">{{ course?.title }}</h3>
+
+  <p class="text-gray-600 mb-2">{{ course?.description }}</p>
+
+  <div class="space-y-1 text-gray-600 mb-2">
+    <p><span class="font-semibold">Level:</span> {{ course?.level }}</p>
+    <p><span class="font-semibold">Instructor:</span> {{ course?.instructor }}</p>
+    <p><span class="font-semibold">Tage:</span> {{ course?.days }}</p>
+    <p><span class="font-semibold">Zeit:</span> {{ course?.time }}</p>
+    <p><span class="font-semibold">Dauer:</span> {{ course?.duration }} Monate</p>
+  </div>
+
+  @if (course?.price?.intern) {
+    <p class="text-lg font-bold text-blue-600 mt-2">
+      € {{ course?.price?.extern }},- / Monat (Externe)
+    </p>
+    <p class="text-lg font-bold text-blue-600">
+      € {{ course?.price?.intern }},- / Monat (Kursteilnehmende)
+    </p>
+  } @else {
+    <p class="text-lg font-bold text-blue-600 mt-2">
+      € {{ course?.price?.extern }},- / Monat
+    </p>
+  }
+
+  @if (course?.isOpenForEnrollment) {
+    <span class="inline-block mt-2 px-3 py-1 bg-green-100 text-green-700 rounded text-sm font-semibold">
+      Jetzt anmelden
+    </span>
+  } @else {
+    <span class="inline-block mt-2 px-3 py-1 bg-red-100 text-red-700 rounded text-sm font-semibold">
+      Ausgebucht
+    </span>
+  }
+</div>
