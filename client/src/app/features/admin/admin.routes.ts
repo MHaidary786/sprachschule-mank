@@ -4,6 +4,7 @@ import { Dashboard } from './dashboard/dashboard';
 import { ManageUsers } from './manage-users/manage-users';
 
 export const routes: Routes = [
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'dashboard', component: Dashboard },
   { path: 'create', component: CreateUser },
   { path: 'manageusers', component: ManageUsers}

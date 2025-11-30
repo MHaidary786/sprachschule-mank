@@ -30,6 +30,7 @@
     "@angular/material": "^20.2.13",
     "@angular/platform-browser": "^20.3.0",
     "@angular/router": "^20.3.0",
+    "@semantic-icons/heroicons": "^0.52.0",
     "@tailwindcss/cli": "^4.1.17",
     "@tailwindcss/postcss": "^4.1.17",
     "@tailwindplus/elements": "^1.0.18",
