@@ -1,0 +1,1 @@
+import{Bb as n,Xa as a,nb as s,ob as r}from"./chunk-UXSHYVRS.js";var e=class t{static \u0275fac=function(o){return new(o||t)};static \u0275cmp=a({type:t,selectors:[["app-dashboard"]],decls:2,vars:0,template:function(o,p){o&1&&(s(0,"p"),n(1,"dashboard works!"),r())},encapsulation:2})};var h=[{path:"dashboard",component:e}];export{h as routes};
