@@ -1,2 +1,290 @@
-<p>courses works!</p>
-<h2>Page - {{ pageId() }} - {{ limit() }}</h2>
+<div class="mx-auto max-w-7xl px-6 lg:px-8 py-12">
+    <div class="flex items-center justify-between mb-8">
+        <h2 class="text-3xl font-bold mb-8">Unsere Kurse</h2>
+        <div>
+            <button type="button" (click)="toggleAddCourseModal()" mat-button>Neuen Kurs hinzufügen</button>
+        </div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Courses -->
+        @for (course of courses; track $index) {
+        <app-course-card [course]="course" (cardClick)="onCourseCardClick($event)"></app-course-card>
+        }
+    </div>
+</div>
+
+<div id="add-course-modal"
+    [hidden]="!showAddCourseModal"
+    class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto bg-gray-900/50 dark:bg-gray-900/60 backdrop-blur-sm">
+    <div class="relative w-full h-full max-w-4xl px-4 md:h-auto">
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-800">
+            <div class="flex items-start justify-between p-5 border-b rounded-t dark:border-gray-700 border-gray-200">
+                <h3 class="text-xl font-semibold dark:text-white">Neuen Kurs erstellen</h3>
+                <button type="button"
+                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-700 dark:hover:text-white"
+                    (click)="toggleAddCourseModal()">
+                    <mat-icon class="w-5 h-5">close</mat-icon>
+                </button>
+            </div>
+
+            <form class="p-6 space-y-6" (ngSubmit)="createCourse()">
+                <div class="grid grid-cols-6 gap-6">
+                    <!-- Course Title -->
+                    <div class="col-span-6">
+                        <label for="title"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kurstitel</label>
+                        <input type="text" name="title" id="title" placeholder="z.B. Deutsch A1"
+                        [(ngModel)]="newCourse.title" name="title"
+                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            required />
+                    </div>
+
+                    <!-- Level -->
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="level"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Niveau</label>
+                        <select name="level" id="level" [(ngModel)]="newCourse.level" name="level"
+                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            required>
+                            <option value="">Wählen Sie...</option>
+                            <option value="Beginner">Anfänger</option>
+                            <option value="Intermediate">Mittelstufe</option>
+                            <option value="Advanced">Fortgeschritten</option>
+                        </select>
+                    </div>
+
+                    <!-- Duration -->
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="duration" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Dauer
+                            (Monate)</label>
+                        <input type="number" name="duration" id="duration" min="1" placeholder="3" [(ngModel)]="newCourse.duration"
+                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            required />
+                    </div>
+
+                    <!-- Days -->
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="days"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tage</label>
+                        <input type="text" name="days" id="days" placeholder="z.B. Dienstag & Donnerstag" [(ngModel)]="newCourse.days"
+                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            required />
+                    </div>
+
+                    <!-- Time -->
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="time"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Zeit</label>
+                        <input type="text" name="time" id="time" placeholder="z.B. 10:00 - 12:00" [(ngModel)]="newCourse.time"
+                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            required />
+                    </div>
+
+                    <!-- Instructor -->
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="instructor"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Dozent/in</label>
+                        <input type="text" name="instructor" id="instructor" placeholder="z.B. Fulya Mank" [(ngModel)]="newCourse.instructor"
+                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            required />
+                    </div>
+
+                    <!-- Price Extern -->
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="priceExtern"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Preis (Extern)</label>
+                        <input type="number" name="priceExtern" id="priceExtern" min="0" step="0.01" placeholder="0.00" [(ngModel)]="newCourse.price.extern"
+                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                    </div>
+
+                    <!-- Price Intern -->
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="priceIntern"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Preis (Intern)</label>
+                        <input type="number" name="priceIntern" id="priceIntern" min="0" step="0.01" placeholder="0.00" [(ngModel)]="newCourse.price.intern"
+                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                    </div>
+
+                    <!-- Image URL -->
+                    <div class="col-span-6">
+                        <label for="imageUrl"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">BildURL</label>
+                        <input type="url" name="imageUrl" id="imageUrl" placeholder="https://..." [(ngModel)]="newCourse.imageUrl"
+                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            required />
+                    </div>
+
+                    <!-- Open for Enrollment -->
+                    <div class="col-span-6">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="isOpenForEnrollment" id="isOpenForEnrollment" [(ngModel)]="newCourse.isOpenForEnrollment"
+                                class="w-4 h-4 rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600" />
+                            <span class="ml-2 text-sm font-medium text-gray-900 dark:text-white">Zur Anmeldung
+                                offen</span>
+                        </label>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="col-span-6">
+                        <label for="description"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Beschreibung</label>
+                        <textarea name="description" id="description" rows="3" placeholder="Kursbeschreibung" [(ngModel)]="newCourse.description"
+                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            required></textarea>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div
+                    class="flex items-center justify-end gap-3 px-5 pt-5 border-t rounded-b dark:border-gray-700 border-gray-200">
+                    <button type="button" (click)="toggleAddCourseModal()"
+                        class="text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 rounded-lg text-sm px-5 py-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
+                        Abbrechen
+                    </button>
+                    <button type="submit"
+                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700">
+                        Kurs erstellen
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="edit-course-modal"
+    [hidden]="!showEditCourseModal"
+    class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto bg-gray-900/50 dark:bg-gray-900/60 backdrop-blur-sm">
+    <div class="relative w-full h-full max-w-4xl px-4 md:h-auto">
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-800">
+            <div class="flex items-start justify-between p-5 border-b rounded-t dark:border-gray-700 border-gray-200">
+                <h3 class="text-xl font-semibold dark:text-white">Kurs bearbeiten</h3>
+                <button type="button"
+                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-700 dark:hover:text-white"
+                    (click)="toggleEditCourseModal()">
+                    <mat-icon class="w-5 h-5">close</mat-icon>
+                </button>
+            </div>
+
+            <form class="p-6 space-y-6" (ngSubmit)="editCourse()">
+                <div class="grid grid-cols-6 gap-6">
+                    <!-- Course Title -->
+                    <div class="col-span-6">
+                        <label for="title"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kurstitel</label>
+                        <input type="text" name="title" id="title" placeholder="z.B. Deutsch A1"
+                        [(ngModel)]="editedCourse.title" name="title"
+                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            required />
+                    </div>
+
+                    <!-- Level -->
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="level"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Niveau</label>
+                        <select name="level" id="level" [(ngModel)]="editedCourse.level" name="level"
+                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            required>
+                            <option value="">Wählen Sie...</option>
+                            <option value="Beginner">Anfänger</option>
+                            <option value="Intermediate">Mittelstufe</option>
+                            <option value="Advanced">Fortgeschritten</option>
+                        </select>
+                    </div>
+
+                    <!-- Duration -->
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="duration" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Dauer
+                            (Monate)</label>
+                        <input type="number" name="duration" id="duration" min="1" placeholder="3" [(ngModel)]="editedCourse.duration"
+                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            required />
+                    </div>
+
+                    <!-- Days -->
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="days"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tage</label>
+                        <input type="text" name="days" id="days" placeholder="z.B. Dienstag & Donnerstag" [(ngModel)]="editedCourse.days"
+                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            required />
+                    </div>
+
+                    <!-- Time -->
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="time"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Zeit</label>
+                        <input type="text" name="time" id="time" placeholder="z.B. 10:00 - 12:00" [(ngModel)]="editedCourse.time"
+                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            required />
+                    </div>
+
+                    <!-- Instructor -->
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="instructor"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Dozent/in</label>
+                        <input type="text" name="instructor" id="instructor" placeholder="z.B. Fulya Mank" [(ngModel)]="editedCourse.instructor"
+                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            required />
+                    </div>
+
+                    <!-- Price Extern -->
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="priceExtern"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Preis (Extern)</label>
+                        <input type="number" name="priceExtern" id="priceExtern" min="0" step="0.01" placeholder="0.00" [(ngModel)]="editedCourse.price.extern"
+                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                    </div>
+
+                    <!-- Price Intern -->
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="priceIntern"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Preis (Intern)</label>
+                        <input type="number" name="priceIntern" id="priceIntern" min="0" step="0.01" placeholder="0.00" [(ngModel)]="editedCourse.price.intern"
+                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                    </div>
+
+                    <!-- Image URL -->
+                    <div class="col-span-6">
+                        <label for="imageUrl"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">BildURL</label>
+                        <input type="url" name="imageUrl" id="imageUrl" placeholder="https://..." [(ngModel)]="editedCourse.imageUrl"
+                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            required />
+                    </div>
+
+                    <!-- Open for Enrollment -->
+                    <div class="col-span-6">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="isOpenForEnrollment" id="isOpenForEnrollment" [(ngModel)]="editedCourse.isOpenForEnrollment"
+                                class="w-4 h-4 rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600" />
+                            <span class="ml-2 text-sm font-medium text-gray-900 dark:text-white">Zur Anmeldung
+                                offen</span>
+                        </label>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="col-span-6">
+                        <label for="description"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Beschreibung</label>
+                        <textarea name="description" id="description" rows="3" placeholder="Kursbeschreibung" [(ngModel)]="editedCourse.description"
+                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            required></textarea>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div
+                    class="flex items-center justify-end gap-3 px-5 pt-5 border-t rounded-b dark:border-gray-700 border-gray-200">
+                    <button type="button" (click)="toggleEditCourseModal()"
+                        class="text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 rounded-lg text-sm px-5 py-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
+                        Abbrechen
+                    </button>
+                    <button type="submit"
+                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700">
+                        Kurs bearbeiten
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

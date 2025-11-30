@@ -1,7 +1,8 @@
 <div class="min-h-screen flex flex-row bg-gray-50">
-  <app-sidebar></app-sidebar>
+  <app-sidebar class="sticky top-0 h-screen overflow-y-auto"></app-sidebar>
 
-  <div class="pl-18">
+  <div class="flex-1 overflow-y-auto">
+    <app-dashboard-navbar></app-dashboard-navbar>
     <router-outlet></router-outlet>
   </div>
 </div>
