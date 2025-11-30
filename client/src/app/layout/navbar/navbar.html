@@ -1,6 +1,4 @@
-<nav
-  class="fixed w-full z-50 flex flex-row h-18 items-center justify-between px-4 bg-white shadow-md"
->
+<nav class="fixed w-full z-50 flex flex-row h-18 items-center justify-between px-4 bg-white shadow-md">
   <div>
     <a href="/" class="flex flex-row items-center gap-3">
       <img src="assets/logo.png" alt="Logo" class="h-12" />
@@ -10,16 +8,28 @@
 
   <div class="flex flex-row items-center gap-4">
     <ul class="flex flex-row gap-3 text-md font-medium">
-      <li><a routerLink="/" routerLinkActive="active">Home</a></li>
-      <li><a routerLink="/courses" routerLinkActive="active">Courses</a></li>
-      <li><a routerLink="/about" routerLinkActive="active">About Me</a></li>
-      <li><a routerLink="/media" routerLinkActive="active">Media</a></li>
-      <li><a routerLink="/impressum" routerLinkActive="active">Impressum</a></li>
-      <li><a routerLink="/contact" routerLinkActive="active">Contact</a></li>
+      <li>
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+      </li>
+      <li>
+        <a routerLink="/courses" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Courses</a>
+      </li>
+      <li>
+        <a routerLink="/about" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">About Me</a>
+      </li>
+      <li>
+        <a routerLink="/media" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Media</a>
+      </li>
+      <li>
+        <a routerLink="/impressum" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Impressum</a>
+      </li>
+      <li>
+        <a routerLink="/contact" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Contact</a>
+      </li>
     </ul>
 
-    
-    <a routerLink="/login" class="flex flex-row gap-2 bg-red-500 text-white items-center rounded-sm px-3 py-2 hover:bg-red-700">
+    <a routerLink="/auth/login"
+      class="flex flex-row gap-2 bg-red-500 text-white items-center rounded-sm px-3 py-2 hover:bg-red-700">
       <mat-icon>account_circle</mat-icon>
       <span>Login / Register</span>
     </a>

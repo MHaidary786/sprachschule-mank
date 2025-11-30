@@ -1,8 +1,11 @@
 import { Routes } from '@angular/router';
 import { CreateUser } from './create-user/create-user';
+import { Dashboard } from './dashboard/dashboard';
+import { ManageUsers } from './manage-users/manage-users';
 
-const routes: Routes = [
+export const routes: Routes = [
+  { path: 'dashboard', component: Dashboard },
   { path: 'create', component: CreateUser },
+  { path: 'manageusers', component: ManageUsers}
 ];
 
-export class AdminRoutes {}

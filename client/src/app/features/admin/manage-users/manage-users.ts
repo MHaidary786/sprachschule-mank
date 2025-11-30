@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-manage-users',
@@ -7,6 +7,12 @@ import { Component } from '@angular/core';
   templateUrl: './manage-users.html',
   styleUrl: './manage-users.css',
 })
-export class ManageUsers {
+export class ManageUsers implements OnInit {
+  
+  constructor() { }
+
+  ngOnInit(): void {
+    
+  }
 
 }
