@@ -4,6 +4,7 @@ import { tap } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private baseUrl = 'http://localhost:5000';
   private tokenKey = 'auth_token';
 
   constructor(private http: HttpClient) {}
@@ -32,7 +33,7 @@ export class AuthService {
     if (credentials.remember) {
       // Implement remember me functionality if needed
     }
-    return this.http.post('/api/auth/login', {username: credentials.username, password: credentials.password}).pipe(
+    return this.http.post(`${this.baseUrl}/api/auth/login`, {email: credentials.email, password: credentials.password}).pipe(
       tap((res: any) => localStorage.setItem(this.tokenKey, res.token))
     );
   }

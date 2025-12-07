@@ -1,4 +1,4 @@
-const User = require('../models/userModel'); // your Mongoose user model
+const User = require('../models/old/userModel'); // your Mongoose user model
 const bcrypt = require('bcryptjs');
 
 /**
@@ -9,6 +9,7 @@ exports.login = async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'User not found' });
+    console.log(user)
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid password' });
