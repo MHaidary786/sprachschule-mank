@@ -11,10 +11,10 @@ import { FormsModule } from '@angular/forms';
   imports: [FormsModule, RouterLink],
 })
 export class Login implements OnInit {
-  credentials = { 
-    username: '', 
-    password: '', 
-    remember: false 
+  credentials = {
+    email: '',
+    password: '',
+    remember: false
   };
   role: string[] = [];
 
@@ -27,7 +27,7 @@ export class Login implements OnInit {
   login() {
     console.log(this.credentials); /// Debugging line
     this.authService.login(this.credentials).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: () => this.router.navigate(['/admin/dashboard']),
       error: (err) => console.error(err),
     });
   }
