@@ -1,17 +1,15 @@
 const { client } = require('./config/db');
 
-const User = require('./models/Users');
-const Course = require('./models/Courses');
-const Lesson = require('./models/Lessons');
-const Quiz = require('./models/Quizzes');
-const Assignment = require('./models/Assignments');
-const Submission = require('./models/Submissions');
-const Enrollment = require('./models/Enrollments');
+const User = require('./models/User');
+const Course = require('./models/Course');
+const Lesson = require('./models/Lesson');
+const Quiz = require('./models/Quiz');
+const Assignment = require('./models/Assignment');
+const Submission = require('./models/Submission');
+const Enrollment = require('./models/Enrollment');
 
 async function initDB() {
     try {
-        await client.connect();
-        console.log('Connected to the database.');
 
         // 1️⃣ Users first (no dependencies)
         await User.initTable();

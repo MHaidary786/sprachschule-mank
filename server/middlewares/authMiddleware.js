@@ -1,8 +1,8 @@
 // server/middlewares/authMiddleware.js
 const jwt = require('jsonwebtoken');
-const Teacher = require('../models/Teacher');
-const Student = require('../models/Student');
-const Admin = require('../models/Admin'); // if you have an admin model
+const Teacher = require('../models/old/Teacher');
+const Student = require('../models/old/Student');
+const Admin = require('../models/old/Admin'); // if you have an admin model
 
 const secret = 'your_jwt_secret_key'; // replace with an environment variable in production
 

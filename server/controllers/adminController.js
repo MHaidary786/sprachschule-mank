@@ -1,6 +1,6 @@
 // server/controllers/adminController.js
-const Admin = require('../models/Admin');
-const User = require('../models/userModel'); // To manage students/teachers
+const Admin = require('../models/old/Admin');
+const User = require('../models/old/userModel'); // To manage students/teachers
 const bcrypt = require('bcryptjs');
 
 // Admin dashboard

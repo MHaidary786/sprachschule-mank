@@ -1,6 +1,6 @@
 // server/controllers/teacherController.js
-const Student = require('../models/Student');
-const Teacher = require('../models/Teacher');
+const Student = require('../models/old/Student');
+const Teacher = require('../models/old/Teacher');
 
 // Teacher dashboard - just an example response
 exports.dashboard = async (req, res) => {
