@@ -3,14 +3,14 @@
 >
   <!-- Header -->
   <div class="border-b border-slate-700/60 p-6">
-    <h2 class="text-2xl font-extrabold tracking-wide">Admin Panel</h2>
-    <p class="text-slate-400 text-sm mt-1">Management Console</p>
+    <h2 class="text-xl font-extrabold tracking-wide">{{ panelTitle }}</h2>
+    <p class="text-slate-400 text-sm mt-1">{{ user?.name || '' }}</p>
   </div>
 
   <!-- Navigation -->
   <nav class="flex-1 overflow-y-auto">
     <ul class="list-none p-3 space-y-1">
-      @for (item of menuItems; track $index) {
+      @for (item of menuItems; track item.label) {
 
       <!-- Regular Menu Item -->
       @if (!item.subMenu) {
@@ -21,7 +21,7 @@
           [routerLinkActive]="'bg-slate-700/70 text-white border-l-4 border-blue-500'"
         >
           <span class="text-slate-400 group-hover:text-blue-400 transition duration-150">
-            <i class="fa-solid fa-circle-small"></i>
+            <mat-icon class="text-lg">{{ item.icon }}</mat-icon>
           </span>
           <span>{{ item.label }}</span>
         </a>
@@ -39,14 +39,13 @@
         >
           <div class="flex items-center gap-3">
             <span class="text-slate-400 group-hover:text-blue-400 transition duration-150">
-              <i class="fa-solid fa-folder"></i>
+              <mat-icon class="text-lg">{{ item.icon }}</mat-icon>
             </span>
             <span>{{ item.label }}</span>
           </div>
-          <i
-            class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-300"
-            [class.rotate-180]="item.open"
-          ></i>
+          <span class="text-slate-400 transition-transform duration-300 inline-block">
+            <mat-icon class="text-base" [class.rotate-180]="item.open">expand_more</mat-icon>
+          </span>
         </button>
 
         <!-- Submenu -->
@@ -54,7 +53,7 @@
           class="ml-3 mt-1 space-y-1 overflow-hidden transition-all duration-300"
           [style.maxHeight]="item.open ? item.subMenu.length * 45 + 'px' : '0px'"
         >
-          @for (subItem of item.subMenu; track $index) {
+          @for (subItem of item.subMenu; track subItem.label) {
           <li>
             <a
               [routerLink]="subItem.route"
@@ -62,7 +61,7 @@
               [routerLinkActive]="'bg-slate-700/70 text-white border-l-4 border-blue-500'"
             >
               <span class="text-slate-500 group-hover:text-blue-300 transition">
-                <i class="fa-solid fa-angle-right"></i>
+                <mat-icon class="text-base">{{ subItem.icon }}</mat-icon>
               </span>
               <span>{{ subItem.label }}</span>
             </a>
@@ -78,11 +77,13 @@
 
   <!-- Footer -->
   <div class="border-t border-slate-700/60 p-6">
-    <a
-      href="#/logout"
-      class="block px-4 py-2 text-slate-200 no-underline bg-red-600/80 hover:bg-red-600 transition-all rounded-md text-center font-semibold shadow"
+    <button
+      type="button"
+      (click)="logout()"
+      class="w-full flex items-center justify-center gap-2 px-4 py-2 text-slate-200 bg-red-600/80 hover:bg-red-600 transition-all rounded-md font-semibold shadow"
     >
-      Logout
-    </a>
+      <mat-icon class="text-base">logout</mat-icon>
+      Abmelden
+    </button>
   </div>
 </div>
