@@ -25,7 +25,7 @@ export const routes: Routes = [
   {
     path: 'teacher',
     canActivate: [AuthGuard, RoleGuard],
-    data: { roles: ['teacher'] },
+    data: { roles: ['teacher', 'admin'] },
     loadChildren: () => import('./features/teacher/teacher.routes').then((m) => m.routes),
     component: DashboardLayout,
   },
