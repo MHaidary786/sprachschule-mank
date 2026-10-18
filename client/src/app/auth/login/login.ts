@@ -22,6 +22,12 @@ export class Login implements OnInit {
   constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
+    // Already logged in -> go straight to the role home
+    const user = this.authService.getUser();
+    if (user) {
+      this.router.navigate(this.homePathFor(user.role));
+      return;
+    }
     this.role = this.authService.getUserRoles();
   }
 
