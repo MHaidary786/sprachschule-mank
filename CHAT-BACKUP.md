@@ -191,4 +191,78 @@ Rebuilt the client container (`docker compose up -d --build client`).
 
 ---
 
+## 8. Login "Authorization token missing" — Diagnosis & Fix
+
+**User symptom:** getting `{"message":"Authorization token missing"}` when trying to login ("I don't have the token yet?").
+
+**Key explanation:** `/api/auth/login` **never** returns that message — it is public. "Authorization token missing" (401) only comes from *protected* `/api/*` endpoints when a request arrives without a `Bearer` header (e.g. navigating to a dashboard that calls a protected API while logged out). The login itself was failing for a different reason, and the user was seeing the follow-up protected-call error.
+
+**Three stacked problems found:**
+1. **Stray `node server.js` process** (host PID 53152, started 22:20) had grabbed port 5000 → the Docker `server` container exited (137), `client` exited (0).
+2. **`server/.env` had been overwritten with the `.env.example` template** — placeholder values (`change-me`, `change-me-min-8-chars`, `admin@example.com`) and `CLIENT_DATABASE=sprachschule-mank` (a new dedicated DB the user had created).
+3. **The `sprachschule-mank` DB's `users` table was empty** → even correct credentials returned `401 Invalid email or password`.
+   - Bonus: the DB container had been recreated from the template `.env`, so the real Postgres password became `change-me` (verified: `Admin123` fails from host, `change-me` works; in-container 127.0.0.1 is `trust` so both "worked" there).
+
+**Fixes applied:**
+- Killed the stray node process.
+- Restored real credentials into `server/.env` (JWT secret, admin email/password, `CLIENT_DATABASE=sprachschule-mank`, `CLIENT_PASSWORD=change-me` to match the running container).
+- Re-ran `npm run seed:admin` → admin created in the `sprachschule-mank` DB.
+- `docker compose up -d` → all containers Up.
+- Verified: `POST /api/auth/login` via `:5000` **and** via nginx proxy `:4200` → 200, role admin.
+
+**Admin login (unchanged):** `admin@sprachschule-mank.de` / <redacted> (see `server/.env`).
+
+**Open:** `CLIENT_PASSWORD=change-me` is weak — change it (update `.env` + `ALTER USER postgres PASSWORD ...` in the container, or recreate the volume).
+
+---
+
+## 9. Local (non-Docker) Login — "Authorization token missing" (again)
+
+**User symptom:** testing locally (`node server.js` via nodemon, no Docker for API/client), login still returns `{"message":"Authorization token missing"}`.
+
+**Diagnosis (probed the live local server):**
+- The only place that message exists is `middlewares/authMiddleware.js` (via the old `/api` catch-all).
+- `POST /api/auth/login` with the admin credentials → **200 + token** (works fine).
+- `GET /api/auth/login` → **401 "Authorization token missing"** ← the user's request.
+- `POST /api/login` (wrong path) → same 401.
+
+**Root cause:** the login request was a **GET** (or wrong path), so it never matched `router.post('/login')` and fell through to the catch-all `app.use('/api', authenticate, ...)`, which demands a token. A GET can't carry a body — hence "username and password never get to the controller". Typical triggers: opening the URL in a browser, a form without `method="POST"`, or a client hitting the wrong URL.
+
+**Fix:** `server.js` catch-all no longer requires auth — unknown `/api/*` paths now return a plain `404 Not found` (all real routes already protect themselves). Verified after nodemon reload:
+- `GET /api/auth/login` → 404
+- `POST /api/auth/login` (admin creds) → 200 + token
+- `POST /api/login` → 404
+
+**Takeaway for the user:** always call `POST http://localhost:5000/api/auth/login` with a JSON body (`Content-Type: application/json`, `{ email, password }`) — e.g. via the Angular app, Postman, or `curl -X POST`. Never via browser address bar / GET.
+
+---
+
+## 10. Client Admin & Student Controls (user: handle login, admin create user, student dashboard)
+
+**Found broken/missing:**
+- Login worked but: no redirect when already logged in; public navbar always showed "Login"; **no logout anywhere**; dashboard navbar was an empty file.
+- Sidebar hardcoded to `admin` role; admin "create user" route was `/admin/create` but links used `/admin/create-user`; teacher submenu pointed to non-existent `/teacher/my-students`.
+- `manage-users` (admin student management) = placeholder.
+- Student dashboard = placeholder (`<p>dashboard works!</p>`).
+
+**Built:**
+- `login.ts` — redirect to role home when already logged in.
+- `navbar.ts/.html` (public) — shows green **Dashboard** link when logged in, else Login.
+- `dashboard-navbar.ts` (was empty) — shows user name + role and a working **Abmelden** (logout → clears session, navigates home).
+- `sidebar.ts` — menu now derived from the **logged-in user's role** (admin/teacher/student); admin gets Benutzer / Benutzer anlegen / Kurse; teacher → `/teacher/students`.
+- `admin.routes.ts` — create user now at `create-user` (matches links/sidebar).
+- `manage-users.ts` — full admin user manager: table (name, email, role badge, created), search + role filter, pagination (20/page), **edit modal** (name/email/role/optional new password), **delete** (with confirm; own account protected). Wired to `UserService` (`/api/admin/users`).
+- `student/dashboard.ts` — real student dashboard: profile card via `GET /api/auth/me` (falls back to cached user), "Meine Kurse" section with empty state + link to course listings.
+- `teacher/students.ts` + route — lists students via `GET /api/teacher/students` (fixes the sidebar link).
+
+**Verified:**
+- `ng build` (production) → clean, no errors.
+- Live API smoke test (local server): admin login → `/auth/me` → list users (2) → create student (no password leak) → student login (role student) → delete test user. All OK.
+
+**Notes:**
+- Student "Meine Kurse" is an empty state — the enrollments API (`/api/student/courses`) doesn't exist yet (DB table `enrollments` does).
+- UI text is German to match the existing site.
+
+---
+
 *(Append further conversation turns below this line.)*
