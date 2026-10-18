@@ -79,7 +79,13 @@ const schemas = {
 // Replaces req.body with the parsed (trimmed/normalized) value on success.
 function validate(schema) {
     return (req, res, next) => {
-        const result = schema.safeParse(req.body ?? {});
+        const body = req.body;
+        if (Array.isArray(body) || typeof body !== 'object' || body === null) {
+            return res.status(400).json({
+                message: 'Request body must be a JSON object, e.g. {"email":"...","password":"..."}',
+            });
+        }
+        const result = schema.safeParse(body);
         if (!result.success) {
             const details = result.error.issues.map((i) => ({ field: i.path.join('.'), message: i.message }));
             return res.status(400).json({ message: 'Validation failed', details });

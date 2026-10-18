@@ -53,8 +53,9 @@ app.use('/api/student', studentRoutes);
 app.use('/api/teacher', teacherRoutes);
 app.use('/api/admin', adminRoutes);
 
-// Everything else under /api requires a valid token
-app.use('/api', authenticate, (req, res) => {
+// Unknown /api paths -> plain 404 (all real routes are defined above and
+// protect themselves; don't demand a token for a path that doesn't exist)
+app.use('/api', (req, res) => {
     res.status(404).json({ message: 'Not found' });
 });
 
