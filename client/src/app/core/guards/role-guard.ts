@@ -1,19 +1,17 @@
-import { ActivatedRouteSnapshot, CanActivate, Router } from '@angular/router';
+import { inject } from '@angular/core';
+import { ActivatedRouteSnapshot, CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
-export class RoleGuard implements CanActivate {
-  constructor(private auth: AuthService, private router: Router) {}
+export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
 
-  canActivate(route: ActivatedRouteSnapshot): boolean {
-    const allowedRoles = route.data['roles'] as string[];
-    const userRoles = this.auth.getUserRoles();
-    const match = userRoles.some((role) => allowedRoles.includes(role));
+  const allowedRoles = (route.data['roles'] as string[]) || [];
+  const userRoles = auth.getUserRoles();
+  const match = userRoles.some((role) => allowedRoles.includes(role));
 
-    if (!match) {
-      this.router.navigate(['/']);
-      return false;
-    }
-
-    return true;
+  if (!match) {
+    return router.parseUrl('/');
   }
-}
+  return true;
+};
