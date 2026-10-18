@@ -10,8 +10,11 @@ exports.login = [validate(schemas.login), async (req, res, next) => {
         const { email, password } = req.body;
         const user = await User.getByEmail(email);
 
+        console.log(`Login attempt for email: ${email}`);
+
         // Constant-shape response: same status/message whether the user exists or not.
         if (!user || !(await bcrypt.compare(password, user.password))) {
+            console.log(`Failed login attempt for email: ${email}`);
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
@@ -29,6 +32,7 @@ exports.login = [validate(schemas.login), async (req, res, next) => {
         return next(err);
     }
 }];
+
 
 // POST /api/auth/create-user  (admin only)
 exports.createUser = [authenticate, authorize('admin'), validate(schemas.createUser), async (req, res, next) => {
