@@ -12,6 +12,7 @@ const authRoutes = require('./routes/authRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const teacherRoutes = require('./routes/teacherRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const publicRoutes = require('./routes/publicRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -33,7 +34,7 @@ app.use(cors({
     credentials: true,
 }));
 
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: '200kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // General API rate limit
@@ -47,6 +48,7 @@ app.use('/api', rateLimit({
 
 // --- Routes --------------------------------------------------------------
 app.use('/api/auth', authRoutes);
+app.use('/api/public', publicRoutes);
 app.use('/api/student', studentRoutes);
 app.use('/api/teacher', teacherRoutes);
 app.use('/api/admin', adminRoutes);

@@ -2,31 +2,21 @@ const { client } = require('./config/db');
 
 const User = require('./models/User');
 const Course = require('./models/Course');
-const Lesson = require('./models/Lesson');
-const Quiz = require('./models/Quiz');
-const Assignment = require('./models/Assignment');
-const Submission = require('./models/Submission');
-const Enrollment = require('./models/Enrollment');
+const Page = require('./models/Page');
+const seedContent = require('./scripts/seed-content');
 
 async function initDB() {
     // 1️⃣ Users first (no dependencies)
     await User.initTable();
 
     // 2️⃣ Courses (depends on User for teacher_id)
-    await client.query(`
-        CREATE TABLE IF NOT EXISTS courses (
-            id SERIAL PRIMARY KEY,
-            teacher_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-            title VARCHAR(255) NOT NULL,
-            description TEXT NOT NULL,
-            language VARCHAR(255) NOT NULL,
-            level VARCHAR(50) NOT NULL,
-            thumbnail VARCHAR(255),
-            status VARCHAR(50) NOT NULL
-        );
-    `);
+    await Course.initTable();
+    await Course.migrate();
 
-    // 3️⃣ Lessons (depends on Course)
+    // 3️⃣ Public site pages (admin-managed content)
+    await Page.initTable();
+
+    // 4️⃣ Lessons (depends on Course)
     await client.query(`
         CREATE TABLE IF NOT EXISTS lessons (
             id SERIAL PRIMARY KEY,
@@ -39,7 +29,7 @@ async function initDB() {
         );
     `);
 
-    // 4️⃣ Quizzes (depends on Lesson)
+    // 5️⃣ Quizzes (depends on Lesson)
     await client.query(`
         CREATE TABLE IF NOT EXISTS quizzes (
             id SERIAL PRIMARY KEY,
@@ -50,7 +40,7 @@ async function initDB() {
         );
     `);
 
-    // 5️⃣ Assignments (depends on Lesson)
+    // 6️⃣ Assignments (depends on Lesson)
     await client.query(`
         CREATE TABLE IF NOT EXISTS assignments (
             id SERIAL PRIMARY KEY,
@@ -60,7 +50,7 @@ async function initDB() {
         );
     `);
 
-    // 6️⃣ Submissions (depends on Assignment and User)
+    // 7️⃣ Submissions (depends on Assignment and User)
     await client.query(`
         CREATE TABLE IF NOT EXISTS submissions (
             id SERIAL PRIMARY KEY,
@@ -72,7 +62,7 @@ async function initDB() {
         );
     `);
 
-    // 7️⃣ Enrollments (depends on Course and User)
+    // 8️⃣ Enrollments (depends on Course and User)
     await client.query(`
         CREATE TABLE IF NOT EXISTS enrollments (
             id SERIAL PRIMARY KEY,
@@ -88,6 +78,9 @@ async function initDB() {
         CREATE UNIQUE INDEX IF NOT EXISTS uniq_enrollment_student_course
         ON enrollments (student_id, course_id);
     `);
+
+    // 9️⃣ Seed default public site pages + sample courses (only on first run)
+    await seedContent();
 
     console.log('All tables initialized successfully!');
 }
