@@ -1,0 +1,7 @@
+.git
+server/node_modules
+client/node_modules
+client/dist
+client/.angular
+server/test
+wireframe

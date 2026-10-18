@@ -1,14 +1,7 @@
 import { Component } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { StudentApiService } from '../../student/student-api';
 import { FormsModule } from '@angular/forms';
-
-interface Student {
-  name: string;
-  email: string;
-  password: string;
-  courses?: string[];
-}
+import { UserService, CreateUserInput } from '../../../core/services/user.service';
 
 @Component({
   selector: 'app-create-user',
@@ -17,26 +10,27 @@ interface Student {
   template: `
     <main>
       <h2>Create User</h2>
-      <form #studentForm="ngForm" (ngSubmit)="onSubmit(student)">
+      <form (ngSubmit)="onSubmit(userForm.value)" #userForm="ngForm">
         <label for="name">Name:</label>
-        <input id="name" name="name" type="text" required [(ngModel)]="student.name" />
+        <input id="name" name="name" type="text" required minlength="1" maxlength="100" [(ngModel)]="user.name" />
         <br />
         <label for="email">Email:</label>
-        <input id="email" name="email" type="email" required [(ngModel)]="student.email" />
+        <input id="email" name="email" type="email" required [(ngModel)]="user.email" />
         <br />
-        <label for="password">Password:</label>
-        <input id="password" name="password" type="password" required [(ngModel)]="student.password" />
+        <label for="password">Password (min. 8 chars):</label>
+        <input id="password" name="password" type="password" required minlength="8" [(ngModel)]="user.password" />
         <br />
-        <label for="courses">Courses:</label>
-        <select id="courses" name="courses" [(ngModel)]="student.courses" multiple>
-          <option value="english">English</option>
-          <option value="german">German</option>
-          <option value="spanish">Spanish</option>
-          <option value="french">French</option>
-          <option value="italian">Italian</option>
+        <label for="role">Role:</label>
+        <select id="role" name="role" [(ngModel)]="user.role">
+          <option value="student">Student</option>
+          <option value="teacher">Teacher</option>
+          <option value="admin">Admin</option>
         </select>
         <br />
-        <button type="submit" [disabled]="!studentForm.valid">Create User</button>
+        <button type="submit" [disabled]="!userForm.valid">Create User</button>
+        @if (error) {
+          <p class="error-message">{{ error }}</p>
+        }
         <a routerLink="/admin/dashboard">Back to Dashboard</a>
       </form>
     </main>
@@ -44,18 +38,20 @@ interface Student {
   styleUrls: ['./create-user.css'],
 })
 export class CreateUser {
-  student: Student = { name: '', email: '', password: '', courses: [] };
+  user: CreateUserInput = { name: '', email: '', password: '', role: 'student' };
+  error: string | null = null;
 
-  constructor(private studentApiService: StudentApiService, private router: Router) {}
+  constructor(private userService: UserService, private router: Router) {}
 
-  onSubmit(studentData: Student) {
-    if (!studentData) return;
-    console.log('Submitting student data:', studentData);
-    this.studentApiService.createStudent(studentData).subscribe({
+  onSubmit(input: CreateUserInput): void {
+    if (!input) return;
+    this.error = null;
+    this.userService.create(input).subscribe({
       next: () => this.router.navigate(['/admin/dashboard']),
-      error: (err) => console.error('Error creating user:', err),
+      error: (err) => {
+        console.error('Error creating user:', err);
+        this.error = err?.error?.message || 'Failed to create user';
+      },
     });
   }
 }
-
-

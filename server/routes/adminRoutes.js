@@ -1,15 +1,12 @@
 const express = require('express');
-const router = express.Router();
 const adminController = require('../controllers/adminController');
-const authMiddleware = require('../middlewares/authMiddleware');
 
-// Protect all admin routes
-router.use(authMiddleware.verifyAdminToken);
+const router = express.Router();
 
-// Admin dashboard
 router.get('/dashboard', adminController.dashboard);
-
-// Manage users (teachers/students)
-router.get('/manage-users', adminController.manageUsers);
+router.get('/users', adminController.manageUsers);
+router.post('/users', adminController.createUser);
+router.patch('/users/:id', adminController.updateUser);
+router.delete('/users/:id', adminController.deleteUser);
 
 module.exports = router;

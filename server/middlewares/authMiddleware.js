@@ -1,77 +1,35 @@
-// server/middlewares/authMiddleware.js
 const jwt = require('jsonwebtoken');
-const Teacher = require('../models/old/Teacher');
-const Student = require('../models/old/Student');
-const Admin = require('../models/old/Admin'); // if you have an admin model
+require('dotenv').config();
 
-const secret = 'your_jwt_secret_key'; // replace with an environment variable in production
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET is not set. Copy server/.env.example to server/.env and set it.');
+}
 
-// Verify teacher token
-exports.verifyTeacherToken = async (req, res, next) => {
-  try {
+// Verifies the Bearer token and attaches the decoded payload to req.user.
+function authenticate(req, res, next) {
     const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer '))
-      return res.status(401).json({ message: 'Authorization token missing' });
-
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ message: 'Authorization token missing' });
+    }
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, secret);
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+        return next();
+    } catch {
+        return res.status(401).json({ message: 'Invalid or expired token' });
+    }
+}
 
-    // Check if user is a teacher
-    const teacher = await Teacher.findById(decoded.id);
-    if (!teacher) return res.status(403).json({ message: 'Access denied. Not a teacher.' });
+// Use after authenticate. Grants access if req.user.role is one of the given roles.
+function authorize(...roles) {
+    return (req, res, next) => {
+        if (!req.user || !roles.includes(req.user.role)) {
+            return res.status(403).json({ message: 'Forbidden' });
+        }
+        return next();
+    };
+}
 
-    // Attach teacher info to request
-    req.teacherId = teacher._id;
-    req.teacher = teacher;
-
-    next();
-  } catch (err) {
-    res.status(401).json({ message: 'Invalid token', error: err.message });
-  }
-};
-
-// Optional: you can also create student/admin verifiers
-exports.verifyStudentToken = async (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer '))
-      return res.status(401).json({ message: 'Authorization token missing' });
-
-    const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, secret);
-
-    const student = await Student.findById(decoded.id);
-    if (!student) return res.status(403).json({ message: 'Access denied. Not a student.' });
-
-    req.studentId = student._id;
-    req.student = student;
-
-    next();
-  } catch (err) {
-    res.status(401).json({ message: 'Invalid token', error: err.message });
-  }
-};
-
-exports.verifyAdminToken = async (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer '))
-      return res.status(401).json({ message: 'Authorization token missing' });
-
-    const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, secret);
-
-    const admin = await Admin.findById(decoded.id);
-    if (!admin) return res.status(403).json({ message: 'Access denied. Not an admin.' });
-
-    req.adminId = admin._id;
-    req.admin = admin;
-
-    next();
-  } catch (err) {
-    res.status(401).json({ message: 'Invalid token', error: err.message });
-  }
-};
+module.exports = { authenticate, authorize, JWT_SECRET };

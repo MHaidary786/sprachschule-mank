@@ -1,58 +1,102 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const { client } = require('./config/db'); // your PostgreSQL client
+const helmet = require('helmet');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+require('dotenv').config();
 
-// Import route files (create later)
+const { client } = require('./config/db');
+const initDB = require('./initDB');
+const { authenticate } = require('./middlewares/authMiddleware');
+
 const authRoutes = require('./routes/authRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const teacherRoutes = require('./routes/teacherRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 
-const initDB = require('./initDB');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// --- Security middleware -------------------------------------------------
+app.use(helmet());
 
-// // Middleware
-// app.use(cors());
-// app.use(express.json());
+const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:4200')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
 
-// Routes
+app.use(cors({
+    origin(origin, callback) {
+        // Allow non-browser clients (no Origin header, e.g. curl/mobile)
+        if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+        return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+}));
+
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+
+// General API rate limit
+app.use('/api', rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 300,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { message: 'Too many requests, please try again later' },
+}));
+
+// --- Routes --------------------------------------------------------------
 app.use('/api/auth', authRoutes);
 app.use('/api/student', studentRoutes);
 app.use('/api/teacher', teacherRoutes);
 app.use('/api/admin', adminRoutes);
 
-// Test route
+// Everything else under /api requires a valid token
+app.use('/api', authenticate, (req, res) => {
+    res.status(404).json({ message: 'Not found' });
+});
+
 app.get('/', (req, res) => {
     res.send('Language Learning Platform API is running');
 });
 
-// Start server + connect to DB
+// --- 404 + global error handler (no stack traces to the client) ----------
+app.use((req, res) => {
+    res.status(404).json({ message: 'Not found' });
+});
+
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+    if (err.type === 'entity.parse.failed') {
+        return res.status(400).json({ message: 'Invalid JSON body' });
+    }
+    if (err.type === 'entity.too.large') {
+        return res.status(413).json({ message: 'Payload too large' });
+    }
+    console.error('Unhandled error:', err);
+    return res.status(500).json({ message: 'Server error' });
+});
+
+// --- Startup -------------------------------------------------------------
 async function startServer() {
     try {
-        // Connect to PostgreSQL
         await client.connect();
         console.log('Database connected successfully.');
-
-        // Initialize all tables
         await initDB();
         console.log('Tables initialized.');
-
-        // Optionally initialize tables here if you don't run initDB.js separately
-        // const User = require('./models/Users');
-        // const Course = require('./models/Courses');
-        // ...call User.initTable(), Course.initTable(), etc.
-
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
         });
     } catch (err) {
         console.error('Error starting server:', err);
+        process.exit(1);
     }
 }
 
-startServer();
+// Exported for testing
+module.exports = { app, startServer };
+
+// Only start the server when run directly (not when required by tests)
+if (require.main === module) {
+    startServer();
+}

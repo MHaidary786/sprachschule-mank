@@ -1,94 +1,56 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { StudentApiService } from '../../student/student-api';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-
-interface Student {
-  id?: number | string;
-  name: string;
-  email: string;
-  courses?: string[];
-}
+import { UserService } from '../../../core/services/user.service';
+import { User } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-admin-dashboard',
   imports: [RouterModule, CommonModule, FormsModule],
   standalone: true,
-  // templateUrl: './dashboard.html',
   template: `
     <main>
       <h2>Admin Dashboard</h2>
       <p>Welcome to the admin dashboard!</p>
-      <a routerLink="/admin/create-user">Create Student</a>
+      <a routerLink="/admin/create-user">Create User</a>
 
       <section>
-        <h3>Get Student By Name</h3>
-        <form #getStudentForm="ngForm" (ngSubmit)="loadStudentByName()">
-          <label for="studentName">Student Name:</label>
-          <input id="studentName" name="studentName" type="text" required [(ngModel)]="studentName" />
-        </form>
-        <button (click)="loadStudentByName()" [disabled]="!studentName">Get Student</button>
-
-        @if (fetchedStudent) {
-          <div>
-          <p><strong>Name:</strong> {{ fetchedStudent.name }}</p>
-          <p><strong>Email:</strong> {{ fetchedStudent.email }}</p>
-          <p><strong>Courses:</strong> {{ fetchedStudent.courses?.join(', ') || 'None' }}</p>
-        </div>
-        }
+        <h3>Users</h3>
         @if (error) {
           <div class="error-message">{{ error }}</div>
         }
+        <ul>
+          @for (user of users; track user.id) {
+            <li>
+              <strong>Name:</strong> {{ user.name }} <br />
+              <strong>Email:</strong> {{ user.email }} <br />
+              <strong>Role:</strong> {{ user.role }}
+            </li>
+          }
+        </ul>
       </section>
-
-      <h3>Students List</h3>
-      <ul>
-        @for (student of students; track student.name) 
-        {
-          <li>
-          <strong>Name:</strong> {{ student.name }} <br />
-          <strong>Email:</strong> {{ student.email }} <br />
-          <strong>Courses:</strong> {{ student.courses?.join(', ') || 'None' }}
-        </li>
-        }
-      </ul>
     </main>
   `,
   styleUrl: './dashboard.css',
 })
 export class Dashboard implements OnInit {
-  
-  students: Student[] = [];
-  studentName: string = '';
-  fetchedStudent: Student | null = null;
+  users: User[] = [];
   error: string = '';
 
-  constructor(private studentApiService: StudentApiService) {}
+  constructor(private userService: UserService) {}
 
   ngOnInit(): void {
-    this.loadStudents();
-  }
-  loadStudents(): void {
-    this.studentApiService.getAll().subscribe({
-      next: (data) => (this.students = data),
-      error: (err) => console.error('Failed to load students:', err),
-    });
+    this.loadUsers();
   }
 
-  loadStudentByName() {
-    if (!this.studentName) return;
-    this.studentApiService.getStudentByName(this.studentName).subscribe({
-      next: (data: Student | null) => (this.fetchedStudent = data),
-      error: (err: any) => {
-        console.error('Failed to load student:', err);
-        this.fetchedStudent = null;
-        this.error = 'Failed to load student. Please try again.';
+  loadUsers(): void {
+    this.userService.getAll().subscribe({
+      next: (data) => (this.users = data),
+      error: (err) => {
+        console.error('Failed to load users:', err);
+        this.error = 'Failed to load users. Please try again.';
       },
     });
   }
-
-  // trackByIndex(index: number, item: Student): number | string {
-  //   return item?.id ?? index;
-  // }
 }

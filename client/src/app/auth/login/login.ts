@@ -17,6 +17,7 @@ export class Login implements OnInit {
     remember: false
   };
   role: string[] = [];
+  error: string | null = null;
 
   constructor(private router: Router, private authService: AuthService) {}
 
@@ -25,11 +26,21 @@ export class Login implements OnInit {
   }
 
   login() {
-    console.log(this.credentials); /// Debugging line
     this.authService.login(this.credentials).subscribe({
-      next: () => this.router.navigate(['/admin/dashboard']),
-      error: (err) => console.error(err),
+      next: (user) => this.router.navigate(this.homePathFor(user.role)),
+      error: (err) => this.error = err?.error?.message || 'Login failed',
     });
+  }
+
+  private homePathFor(role: string): string[] {
+    switch (role) {
+      case 'admin':
+        return ['/admin', 'dashboard'];
+      case 'teacher':
+        return ['/teacher', 'dashboard'];
+      default:
+        return ['/student', 'dashboard'];
+    }
   }
 
   // Carousel

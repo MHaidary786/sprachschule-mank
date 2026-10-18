@@ -1,13 +1,21 @@
 const express = require('express');
-const router = express.Router();
+const rateLimit = require('express-rate-limit');
 const authController = require('../controllers/authController');
-const authMiddleware = require('../middlewares/authMiddleware');
 
+const router = express.Router();
 
-// Login route
-router.post('/login', authController.login);
+// Strict limit on login to slow brute-force attempts
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 10,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { message: 'Too many login attempts, please try again later' },
+});
 
-// Example route for creating users (admin/teacher)
+router.post('/login', loginLimiter, authController.login);
 router.post('/create-user', authController.createUser);
+router.get('/me', authController.me);
+router.post('/change-password', authController.changePassword);
 
 module.exports = router;
