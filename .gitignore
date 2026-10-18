@@ -5,6 +5,10 @@ node_modules/
 .env
 .env.local
 .env.*.local
+server/.env.temp
+
+# Local test scripts containing credentials
+client/test-login.cjs
 
 # Logs
 *.log
