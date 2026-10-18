@@ -2,8 +2,11 @@ const User = require('../models/User');
 const { authenticate, authorize } = require('../middlewares/authMiddleware');
 const { parsePagination } = require('../utils/validate');
 
+// Admins can also be teachers, so they get access to the teacher area too.
+const teacherRoles = ['teacher', 'admin'];
+
 // GET /api/teacher/dashboard
-exports.dashboard = [authenticate, authorize('teacher'), async (req, res, next) => {
+exports.dashboard = [authenticate, authorize(...teacherRoles), async (req, res, next) => {
     try {
         const teacher = await User.getById(req.user.sub);
         if (!teacher) return res.status(404).json({ message: 'Teacher not found' });
@@ -14,7 +17,7 @@ exports.dashboard = [authenticate, authorize('teacher'), async (req, res, next) 
 }];
 
 // GET /api/teacher/students
-exports.listStudents = [authenticate, authorize('teacher'), async (req, res, next) => {
+exports.listStudents = [authenticate, authorize(...teacherRoles), async (req, res, next) => {
     try {
         const { limit, offset } = parsePagination(req.query);
         const students = await User.getAll({ limit, offset });
@@ -25,7 +28,7 @@ exports.listStudents = [authenticate, authorize('teacher'), async (req, res, nex
 }];
 
 // GET /api/teacher/students/:id
-exports.getStudent = [authenticate, authorize('teacher'), async (req, res, next) => {
+exports.getStudent = [authenticate, authorize(...teacherRoles), async (req, res, next) => {
     try {
         const id = Number(req.params.id);
         if (!Number.isInteger(id)) return res.status(400).json({ message: 'Invalid student id' });
