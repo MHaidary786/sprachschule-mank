@@ -1,4 +1,4 @@
-import { Component, input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Course, CourseCard } from '../../../shared/components/course-card/course-card';
 import { Router } from '@angular/router';
 import { MatAnchor } from "@angular/material/button";
@@ -13,9 +13,6 @@ import { FormsModule } from '@angular/forms';
   imports: [CourseCard, MatAnchor, MatIcon, FormsModule],
 })
 export class Courses implements OnInit {
-  pageId = input.required<string>();
-  limit = input.required<string>();
-
   newCourse: Course = {
   id: 0,
   title: '',
