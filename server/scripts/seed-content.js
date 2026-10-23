@@ -1,6 +1,7 @@
 const { client } = require('../config/db');
 const Page = require('../models/Page');
 const Course = require('../models/Course');
+const Event = require('../models/Event');
 
 const homeHtml = `<div class="overflow-hidden bg-white py-24 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
@@ -512,6 +513,65 @@ const SAMPLE_COURSES = [
     },
 ];
 
+const img = (photo) => `https://images.unsplash.com/${photo}?auto=format&fit=crop&w=800&q=80`;
+
+const SAMPLE_EVENTS = [
+    {
+        title: 'Sommerfest 2026',
+        slug: 'sommerfest-2026',
+        description: 'Ein sonniger Tag voller Sprache: Bei unserem Sommerfest haben Lernende und Lehrende ' +
+            'gemeinsam gefeiert, neue Freundschaften geschlossen und die Sprachkurse bei Musik und gutem Essen gefeiert.',
+        event_date: '2026-07-18',
+        cover_image: img('photo-1492684223066-81342ee5ff30'),
+        is_public: true,
+        order: 1,
+        photos: [
+            { url: img('photo-1492684223066-81342ee5ff30'), caption: 'Volles Haus beim Sommerfest' },
+            { url: img('photo-1529333166437-7750a6dd5a70'), caption: 'Spaß in der ganzen Gruppe' },
+            { url: img('photo-1524178232363-1fb2b075b655'), caption: 'Kultureller Austausch' },
+            { url: img('photo-1522202176988-66273c2fd55f'), caption: 'Unsere Lernenden zusammen' },
+            { url: img('photo-1521791136064-7986c2920216'), caption: 'Gemeinsame Aktivität' },
+            { url: 'https://picsum.photos/seed/unterrichten/800/600', caption: 'Unterricht zum Mitmachen' },
+        ],
+    },
+    {
+        title: 'Abitur-Feier',
+        slug: 'abitur-feier',
+        description: 'Herzlichen Glückwunsch, Abiturienten! Wir haben gemeinsam die bestandene Prüfung ' +
+            'und den erfolgreichen Abschluss gefeiert – ein Moment, auf den die Lernenden lange hingearbeitet haben.',
+        event_date: '2026-06-15',
+        cover_image: img('photo-1524178232363-1fb2b075b655'),
+        is_public: true,
+        order: 2,
+        photos: [
+            { url: img('photo-1524178232363-1fb2b075b655'), caption: 'Stolze Abschlusskandidaten' },
+            { url: img('photo-1544717297-fa95b6ee9643'), caption: 'Lernende bei der Abiturfeier' },
+            { url: img('photo-1529333166437-7750a6dd5a70'), caption: 'Feierstimmung im Klassenzimmer' },
+            { url: img('photo-1522202176988-66273c2fd55f'), caption: 'Die gesamte Abschlussklasse' },
+            { url: img('photo-1517245386807-bb43f82c33c4'), caption: 'Reden und Eröffnungszeremonie' },
+            { url: img('photo-1513633263277-30a4150f7687'), caption: 'Letzte Stunde vor der Feier' },
+        ],
+    },
+    {
+        title: 'Weihnachtsfeier 2025',
+        slug: 'weihnachtsfeier-2025',
+        description: 'Zur Weihnachtszeit haben wir bei Glühwein und Plätzchen gemeinsam auf ein erfolgreiches ' +
+            'Schuljahr zurückgeblickt und den Lernenden für ihr Engagement gedankt.',
+        event_date: '2025-12-19',
+        cover_image: img('photo-1552664730-d307ca884978'),
+        is_public: true,
+        order: 3,
+        photos: [
+            { url: img('photo-1552664730-d307ca884978'), caption: 'Festliche Stimmung' },
+            { url: img('photo-1542626991-cbc4e32524cc'), caption: 'Weihnachtsfeier' },
+            { url: img('photo-1513633263277-30a4150f7687'), caption: 'Weihnachtlicher Unterricht' },
+            { url: img('photo-1521791136064-7986c2920216'), caption: 'Gemeinsam feiern' },
+            { url: img('photo-1522202176988-66273c2fd55f'), caption: 'Lernende und Lehrende zusammen' },
+            { url: img('photo-1529333166437-7750a6dd5a70'), caption: 'Lachen und Feiern' },
+        ],
+    },
+];
+
 // Seed the default site pages and sample courses, but only on the very first run.
 async function seedContent() {
     const pageCount = await client.query(`SELECT COUNT(*)::int AS count FROM pages`);
@@ -539,6 +599,14 @@ async function seedContent() {
         } else {
             console.log('No teacher/admin user found, skipping course seed');
         }
+    }
+
+    const eventCount = await client.query(`SELECT COUNT(*)::int AS count FROM events`);
+    if (eventCount.rows[0].count === 0) {
+        for (const event of SAMPLE_EVENTS) {
+            await Event.createEvent(event);
+        }
+        console.log(`Seeded ${SAMPLE_EVENTS.length} sample events`);
     }
 }
 

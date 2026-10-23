@@ -1,27 +1,7 @@
 const User = require('../models/User');
+const Enrollment = require('../models/Enrollment');
 const { authenticate, authorize } = require('../middlewares/authMiddleware');
 const { validate, parsePagination, schemas } = require('../utils/validate');
-
-// Self-service registration: always creates a student, never a teacher/admin.
-// POST /api/student/register
-exports.register = [validate(schemas.createUser), async (req, res, next) => {
-    try {
-        const { name, email, password } = req.body;
-
-        const existing = await User.getByEmail(email);
-        if (existing) {
-            return res.status(409).json({ message: 'Email already in use' });
-        }
-
-        const user = await new User(name, email, password, 'student').save();
-        return res.status(201).json({ message: 'Student registered successfully', user });
-    } catch (err) {
-        if (err.code === '23505') {
-            return res.status(409).json({ message: 'Email already in use' });
-        }
-        return next(err);
-    }
-}];
 
 // GET /api/student
 exports.getStudents = [authenticate, authorize('teacher', 'admin'), async (req, res, next) => {
@@ -29,6 +9,17 @@ exports.getStudents = [authenticate, authorize('teacher', 'admin'), async (req, 
         const { limit, offset } = parsePagination(req.query);
         const students = await User.getAll({ limit, offset });
         return res.json(students.filter((u) => u.role === 'student'));
+    } catch (err) {
+        return next(err);
+    }
+}];
+
+// GET /api/student/me/courses
+// The current student's own courses and their teachers.
+exports.myCourses = [authenticate, authorize('student'), async (req, res, next) => {
+    try {
+        const courses = await Enrollment.getByStudent(req.user.sub);
+        return res.json(courses);
     } catch (err) {
         return next(err);
     }

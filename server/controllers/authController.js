@@ -69,11 +69,13 @@ exports.me = [authenticate, async (req, res, next) => {
 exports.changePassword = [validate(schemas.changePassword), authenticate, async (req, res, next) => {
     try {
         const { currentPassword, newPassword } = req.body;
-        const user = await User.getByEmail(req.user.email);
-        if (!user || !(await bcrypt.compare(currentPassword, user.password))) {
+        // Look up by the canonical id from the token, not the email claim, so a
+        // later email edit by an admin can't point this at the wrong account.
+        const ok = await User.verifyPassword(req.user.sub, currentPassword);
+        if (!ok) {
             return res.status(401).json({ message: 'Current password is incorrect' });
         }
-        await User.updatePassword(user.id, newPassword);
+        await User.updatePassword(req.user.sub, newPassword);
         return res.json({ message: 'Password updated' });
     } catch (err) {
         return next(err);

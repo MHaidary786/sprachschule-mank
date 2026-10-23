@@ -56,6 +56,20 @@ class User {
         return res.rows[0];
     }
 
+    // count users by role (used for last-admin protection)
+    static async countByRole(role) {
+        const res = await client.query(`SELECT COUNT(*)::int AS count FROM users WHERE role = $1`, [role]);
+        return res.rows[0].count;
+    }
+
+    // Verify a password against the stored hash for a user id.
+    static async verifyPassword(id, plainPassword) {
+        const res = await client.query(`SELECT password FROM users WHERE id = $1`, [id]);
+        const hash = res.rows[0]?.password;
+        if (!hash) return false;
+        return bcrypt.compare(plainPassword, hash);
+    }
+
     // get user by email (includes password hash, for auth only)
     static async getByEmail(email) {
         const res = await client.query(`SELECT * FROM users WHERE email = $1`, [email]);

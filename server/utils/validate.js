@@ -13,6 +13,13 @@ const slug = z
     .max(255)
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug may only contain lowercase letters, numbers and dashes');
 
+// Note: zod 4 matches the protocol part WITHOUT a trailing colon.
+const eventPhoto = z.object({
+    url: z.string().url({ protocol: /^https?$/ }).max(500),
+    caption: z.string().max(255).optional(),
+    order: z.number().int().min(0).max(1000).optional(),
+});
+
 const schemas = {
     login: z.object({ email, password: z.string().min(1) }),
     createUser: z.object({
@@ -28,6 +35,7 @@ const schemas = {
         email: email.optional(),
         avatar: z.string().url().max(255).optional(),
         password: password.optional(),
+        role: z.enum(ROLES).optional(),
     }),
     createPage: z.object({
         title: z.string().trim().min(1).max(255),
@@ -72,6 +80,42 @@ const schemas = {
         price_extern: z.number().nonnegative().max(100000).nullable().optional(),
         price_intern: z.number().nonnegative().max(100000).nullable().optional(),
         is_open_for_enrollment: z.boolean().optional(),
+    }),
+    createBooking: z.object({
+        course_id: z.number().int().positive(),
+        name: name,
+        email,
+        phone: z.string().trim().max(50).optional(),
+        message: z.string().max(2000).optional(),
+    }),
+    bookingStatus: z.enum(['pending', 'approved', 'rejected']),
+    eventPhoto,
+    createEvent: z.object({
+        title: z.string().trim().min(1).max(255),
+        slug,
+        description: z.string().max(5000).optional(),
+        event_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD').nullable().optional(),
+        cover_image: z.string().url().max(500).nullable().optional(),
+        is_public: z.boolean().default(true),
+        order: z.number().int().min(0).max(1000).default(0),
+        photos: z.array(eventPhoto).max(100).default([]),
+    }),
+    updateEvent: z.object({
+        title: z.string().trim().min(1).max(255).optional(),
+        slug: slug.optional(),
+        description: z.string().max(5000).nullable().optional(),
+        event_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD').nullable().optional(),
+        cover_image: z.string().url().max(500).nullable().optional(),
+        is_public: z.boolean().optional(),
+        order: z.number().int().min(0).max(1000).optional(),
+        photos: z.array(eventPhoto).max(100).optional(),
+    }),
+    createContact: z.object({
+        name,
+        email,
+        phone: z.string().trim().max(50).optional(),
+        subject: z.string().trim().max(255).optional(),
+        message: z.string().min(1).max(2000),
     }),
 };
 

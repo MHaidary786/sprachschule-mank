@@ -6,7 +6,7 @@ require('dotenv').config();
 
 const { client } = require('./config/db');
 const initDB = require('./initDB');
-const { authenticate } = require('./middlewares/authMiddleware');
+const ensureData = require('./scripts/ensure-data');
 
 const authRoutes = require('./routes/authRoutes');
 const studentRoutes = require('./routes/studentRoutes');
@@ -87,6 +87,8 @@ async function startServer() {
         console.log('Database connected successfully.');
         await initDB();
         console.log('Tables initialized.');
+        await ensureData();
+        console.log('Seeding complete (admin + demo data).');
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
         });

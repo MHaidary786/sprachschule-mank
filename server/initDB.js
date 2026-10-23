@@ -3,6 +3,9 @@ const { client } = require('./config/db');
 const User = require('./models/User');
 const Course = require('./models/Course');
 const Page = require('./models/Page');
+const BookingRequest = require('./models/BookingRequest');
+const Event = require('./models/Event');
+const ContactMessage = require('./models/ContactMessage');
 const seedContent = require('./scripts/seed-content');
 
 async function initDB() {
@@ -79,7 +82,16 @@ async function initDB() {
         ON enrollments (student_id, course_id);
     `);
 
-    // 9️⃣ Seed default public site pages + sample courses (only on first run)
+    // 9️⃣ Booking requests (guest books a course; admin approves)
+    await BookingRequest.initTable();
+
+    // 🔟 Events + event photos (public gallery by event)
+    await Event.initTable();
+
+    // 1️⃣1️⃣ Contact messages (public contact form)
+    await ContactMessage.initTable();
+
+    // 1️⃣2️⃣ Seed default public site pages + sample courses/events (only on first run)
     await seedContent();
 
     console.log('All tables initialized successfully!');
