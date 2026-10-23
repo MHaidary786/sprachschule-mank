@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "angular-developer": {
+      "source": "angular/skills",
+      "sourceType": "github",
+      "skillPath": "angular-developer/SKILL.md",
+      "computedHash": "479e7c8d75cb017be85ae866c610830aae12f4e38c331d758f321ac2841c2810"
+    },
+    "design": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/design/SKILL.md",
+      "computedHash": "d1cbc4bc8f0bd4273fae84014c6576615b13508743cd9c5240d721dc5143dc83"
+    },
+    "web-design-engineer": {
+      "source": "conardli/garden-skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-design-engineer/SKILL.md",
+      "computedHash": "5f54d17dcdc77667489f8c216caceda287591773d0ad81b69efa822197ca4384"
+    }
+  }
+}
