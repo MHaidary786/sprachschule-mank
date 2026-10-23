@@ -1,49 +1,73 @@
-<div
+<article
   (click)="onCardClick()"
   [class.cursor-not-allowed]="!course?.isOpenForEnrollment"
-  [class.opacity-75]="!course?.isOpenForEnrollment"
-  [class.hover:shadow-lg]="course?.isOpenForEnrollment"
-  [class.hover:scale-105]="course?.isOpenForEnrollment"
-  class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500 cursor-pointer transition-all duration-300"
+  [class.opacity-80]="!course?.isOpenForEnrollment"
+  [class.hover:shadow-card-hover]="course?.isOpenForEnrollment"
+  [class.hover:-translate-y-1]="course?.isOpenForEnrollment"
+  class="card flex h-full flex-col cursor-pointer transition-all duration-300"
 >
-  <img
-    [src]="course?.imageUrl"
-    [alt]="course?.title"
-    class="w-full h-40 object-cover rounded mb-4"
-  />
-
-  <h3 class="text-xl font-bold mb-2 text-gray-800">{{ course?.title }}</h3>
-
-  <p class="text-gray-600 mb-2">{{ course?.description }}</p>
-
-  <div class="space-y-1 text-gray-600 mb-2">
-    <p><span class="font-semibold">Level:</span> {{ course?.level }}</p>
-    <p><span class="font-semibold">Instructor:</span> {{ course?.instructor }}</p>
-    <p><span class="font-semibold">Tage:</span> {{ course?.days }}</p>
-    <p><span class="font-semibold">Zeit:</span> {{ course?.time }}</p>
-    <p><span class="font-semibold">Dauer:</span> {{ course?.duration }} Monate</p>
+  <div class="relative m-4 mb-0 overflow-hidden rounded-lg bg-gray-100">
+    <img
+      [src]="course?.imageUrl"
+      [alt]="course?.title"
+      class="aspect-[16/9] w-full object-cover"
+    />
+    @if (course?.isOpenForEnrollment) {
+      <span class="badge absolute right-3 top-3 bg-green-600/95 text-white shadow">
+        Jetzt anmelden
+      </span>
+    } @else {
+      <span class="badge absolute right-3 top-3 bg-gray-800/90 text-white shadow">
+        Ausgebucht
+      </span>
+    }
   </div>
 
-  @if (course?.price?.intern) {
-    <p class="text-lg font-bold text-blue-600 mt-2">
-      € {{ course?.price?.extern }},- / Monat (Externe)
-    </p>
-    <p class="text-lg font-bold text-blue-600">
-      € {{ course?.price?.intern }},- / Monat (Kursteilnehmende)
-    </p>
-  } @else {
-    <p class="text-lg font-bold text-blue-600 mt-2">
-      € {{ course?.price?.extern }},- / Monat
-    </p>
-  }
+  <div class="flex flex-1 flex-col p-4 sm:p-5">
+    <h3 class="text-lg font-bold text-gray-900">{{ course?.title }}</h3>
 
-  @if (course?.isOpenForEnrollment) {
-    <span class="inline-block mt-2 px-3 py-1 bg-green-100 text-green-700 rounded text-sm font-semibold">
-      Jetzt anmelden
-    </span>
-  } @else {
-    <span class="inline-block mt-2 px-3 py-1 bg-red-100 text-red-700 rounded text-sm font-semibold">
-      Ausgebucht
-    </span>
-  }
-</div>
+    <p class="mt-1.5 line-clamp-3 text-sm leading-relaxed text-gray-600">{{ course?.description }}</p>
+
+    <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-gray-400">Level</dt>
+        <dd class="font-semibold text-gray-700">{{ course?.level }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-gray-400">Lehrkraft</dt>
+        <dd class="font-semibold text-gray-700">{{ course?.instructor }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-gray-400">Tage</dt>
+        <dd class="font-semibold text-gray-700">{{ course?.days }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-gray-400">Zeit</dt>
+        <dd class="font-semibold text-gray-700">{{ course?.time }}</dd>
+      </div>
+      <div class="col-span-2">
+        <dt class="text-xs font-medium uppercase tracking-wide text-gray-400">Dauer</dt>
+        <dd class="font-semibold text-gray-700">{{ course?.duration }} Monate</dd>
+      </div>
+    </dl>
+
+    <div class="mt-4 border-t border-gray-100 pt-4">
+      @if (course?.price?.intern) {
+        <p class="text-sm text-gray-500">
+          Extern: <span class="text-lg font-bold text-brand-600">€ {{ course?.price?.extern }},-</span>
+          / Monat
+        </p>
+        <p class="mt-1 text-sm text-gray-500">
+          Kursteilnehmende:
+          <span class="text-lg font-bold text-brand-600">€ {{ course?.price?.intern }},-</span>
+          / Monat
+        </p>
+      } @else {
+        <p class="text-sm text-gray-500">
+          Preis: <span class="text-lg font-bold text-brand-600">€ {{ course?.price?.extern }},-</span>
+          / Monat
+        </p>
+      }
+    </div>
+  </div>
+</article>

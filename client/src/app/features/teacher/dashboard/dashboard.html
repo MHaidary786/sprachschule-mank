@@ -1,39 +1,55 @@
-<main class="p-6">
+<main class="p-4 sm:p-6">
   <div class="mb-6">
-    <h2 class="text-2xl font-bold">Guten Tag, {{ user?.name ?? 'Lehrkraft' }}!</h2>
-    <p class="text-gray-500 mt-1">Hier ist Ihr Überblick als Lehrkraft.</p>
+    <h2 class="text-2xl font-bold text-gray-900">Guten Tag, {{ user?.name ?? 'Lehrkraft' }}!</h2>
+    <p class="mt-1 text-gray-500">Hier ist Ihr Überblick über Ihre Kurse und Schüler.</p>
   </div>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-    <div class="bg-white rounded-lg shadow p-5 flex items-center gap-4">
-      <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-        <mat-icon class="text-blue-600 text-2xl">school</mat-icon>
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-6">
+    <div class="card flex items-center gap-4 p-5">
+      <div class="w-12 h-12 shrink-0 rounded-full bg-brand-50 flex items-center justify-center">
+        <mat-icon class="text-brand-600 text-2xl">school</mat-icon>
       </div>
       <div>
-        <p class="text-gray-500 text-sm">Studenten</p>
-        <p class="text-2xl font-bold">{{ studentCount ?? '–' }}</p>
+        <p class="text-gray-500 text-sm">Meine Schüler</p>
+        <p class="text-2xl font-bold text-gray-900">{{ studentCount ?? '–' }}</p>
       </div>
     </div>
-    <div class="bg-white rounded-lg shadow p-5 flex items-center gap-4">
-      <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+    <div class="card flex items-center gap-4 p-5">
+      <div class="w-12 h-12 shrink-0 rounded-full bg-green-50 flex items-center justify-center">
         <mat-icon class="text-green-600 text-2xl">menu_book</mat-icon>
       </div>
       <div>
         <p class="text-gray-500 text-sm">Meine Kurse</p>
-        <p class="text-2xl font-bold text-gray-400">–</p>
+        <p class="text-2xl font-bold text-gray-900">{{ courseCount ?? '–' }}</p>
       </div>
     </div>
   </div>
 
-  <div class="bg-white rounded-lg shadow p-5">
-    <h3 class="text-lg font-semibold mb-4">Schnellzugriff</h3>
+  <div class="card p-5 mb-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Meine Kurse</h3>
+    @if (courses.length) {
+      <ul class="space-y-2">
+        @for (course of courses; track course.id) {
+          <li class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 px-4 py-3">
+            <span class="font-medium text-gray-800">{{ course.title }}</span>
+            <span class="badge bg-gray-100 text-gray-600">{{ course.student_count ?? 0 }} Schüler</span>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="text-gray-500">Sie sind noch keinem Kurs zugeteilt. Ein Admin weist Ihnen Kurse zu.</p>
+    }
+  </div>
+
+  <div class="card p-5">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Schnellzugriff</h3>
     <div class="flex flex-wrap gap-3">
       <a
         routerLink="/teacher/students"
-        class="flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 transition"
+        class="btn-secondary btn-md"
       >
-        <mat-icon class="text-gray-500">school</mat-icon>
-        <span class="font-medium">Meine Schüler</span>
+        <mat-icon class="text-lg text-gray-500">school</mat-icon>
+        <span>Meine Schüler verwalten</span>
       </a>
     </div>
   </div>

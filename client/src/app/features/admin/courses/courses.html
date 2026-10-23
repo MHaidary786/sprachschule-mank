@@ -1,149 +1,139 @@
-<div class="mx-auto max-w-7xl px-6 lg:px-8 py-12">
-    <div class="flex items-center justify-between mb-8">
-        <h2 class="text-3xl font-bold mb-8">Unsere Kurse</h2>
+<div class="mx-auto max-w-7xl p-4 sm:p-6 lg:px-8">
+    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <button type="button" (click)="toggleAddCourseModal()" mat-button>Neuen Kurs hinzufügen</button>
+            <h2 class="page-title text-gray-900">Unsere Kurse</h2>
+            <p class="mt-1 text-sm text-gray-500">Alle Kursangebote der Sprachschule verwalten.</p>
         </div>
+        <button type="button" (click)="toggleAddCourseModal()" class="btn-primary btn-md shrink-0">
+            <mat-icon class="text-lg">add</mat-icon>
+            <span>Neuen Kurs hinzufügen</span>
+        </button>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Courses -->
-        @for (course of courses; track $index) {
-        <app-course-card [course]="course" (cardClick)="onCourseCardClick($event)"></app-course-card>
-        }
-    </div>
+
+    @if (error) {
+        <div class="alert-error mb-4">{{ error }}</div>
+    }
+    @if (loading) {
+        <p class="text-gray-500">Kurse werden geladen…</p>
+    } @else {
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            @for (course of courses; track course.id) {
+                <div class="flex flex-col">
+                    <app-course-card [course]="toCard(course)" (cardClick)="onCourseCardClick($event)"></app-course-card>
+                    <div class="flex items-center justify-between gap-2 px-1 pt-2">
+                        <span class="truncate text-xs text-gray-500">{{ course.teacher_name }}</span>
+                        <span class="flex shrink-0 gap-3">
+                            <button (click)="startEdit(course)" class="text-sm font-medium text-brand-600 hover:underline">Bearbeiten</button>
+                            <button (click)="confirmRemove(course)" class="text-sm font-medium text-red-600 hover:underline">Löschen</button>
+                        </span>
+                    </div>
+                </div>
+            } @empty {
+                <div class="card flex flex-col items-center gap-2 p-10 text-center sm:col-span-2 lg:col-span-3">
+                    <mat-icon class="text-4xl text-gray-300">menu_book</mat-icon>
+                    <p class="font-medium text-gray-600">Noch keine Kurse vorhanden.</p>
+                </div>
+            }
+        </div>
+    }
 </div>
 
 <div id="add-course-modal"
     [hidden]="!showAddCourseModal"
-    class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto bg-gray-900/50 dark:bg-gray-900/60 backdrop-blur-sm">
-    <div class="relative w-full h-full max-w-4xl px-4 md:h-auto">
-        <div class="relative bg-white rounded-lg shadow dark:bg-gray-800">
-            <div class="flex items-start justify-between p-5 border-b rounded-t dark:border-gray-700 border-gray-200">
-                <h3 class="text-xl font-semibold dark:text-white">Neuen Kurs erstellen</h3>
-                <button type="button"
-                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-700 dark:hover:text-white"
-                    (click)="toggleAddCourseModal()">
+    class="fixed inset-0 z-50 overflow-x-hidden overflow-y-auto bg-gray-900/50 backdrop-blur-sm">
+    <div class="flex min-h-full items-end justify-center p-0 sm:items-center sm:p-4">
+        <div class="relative flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-t-xl bg-white shadow-xl sm:rounded-xl">
+            <div class="flex items-start justify-between gap-4 border-b border-gray-200 p-4 sm:p-5">
+                <h3 class="text-lg font-bold text-gray-900 sm:text-xl">Neuen Kurs erstellen</h3>
+                <button type="button" class="btn-ghost p-1.5" (click)="toggleAddCourseModal()" aria-label="Schließen">
                     <mat-icon class="w-5 h-5">close</mat-icon>
                 </button>
             </div>
 
-            <form class="p-6 space-y-6" (ngSubmit)="createCourse()">
-                <div class="grid grid-cols-6 gap-6">
-                    <!-- Course Title -->
-                    <div class="col-span-6">
-                        <label for="title"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kurstitel</label>
-                        <input type="text" name="title" id="title" placeholder="z.B. Deutsch A1"
-                        [(ngModel)]="newCourse.title" name="title"
-                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required />
-                    </div>
+            <form class="flex flex-col overflow-hidden" (ngSubmit)="createCourse()">
+                <div class="space-y-5 overflow-y-auto p-4 sm:p-6">
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                        <div class="sm:col-span-2">
+                            <label class="label">Kurstitel</label>
+                            <input type="text" name="title" [(ngModel)]="newCourse.title" placeholder="z.B. Deutsch A1"
+                                class="input" required />
+                        </div>
 
-                    <!-- Level -->
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="level"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Niveau</label>
-                        <select name="level" id="level" [(ngModel)]="newCourse.level" name="level"
-                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required>
-                            <option value="">Wählen Sie...</option>
-                            <option value="Beginner">Anfänger</option>
-                            <option value="Intermediate">Mittelstufe</option>
-                            <option value="Advanced">Fortgeschritten</option>
-                        </select>
-                    </div>
+                        <div>
+                            <label class="label">Lehrkraft</label>
+                            <select name="teacher" [(ngModel)]="newCourse.teacher_id" class="input" required>
+                                <option value="" disabled>Wählen Sie…</option>
+                                @for (t of teacherOptions; track t.id) {
+                                    <option [value]="t.id">{{ t.name }} ({{ t.role }})</option>
+                                }
+                            </select>
+                        </div>
 
-                    <!-- Duration -->
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="duration" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Dauer
-                            (Monate)</label>
-                        <input type="number" name="duration" id="duration" min="1" placeholder="3" [(ngModel)]="newCourse.duration"
-                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required />
-                    </div>
+                        <div>
+                            <label class="label">Sprache</label>
+                            <input type="text" name="language" [(ngModel)]="newCourse.language" class="input" required />
+                        </div>
 
-                    <!-- Days -->
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="days"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tage</label>
-                        <input type="text" name="days" id="days" placeholder="z.B. Dienstag & Donnerstag" [(ngModel)]="newCourse.days"
-                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required />
-                    </div>
+                        <div>
+                            <label class="label">Niveau</label>
+                            <select name="level" [(ngModel)]="newCourse.level" class="input" required>
+                                <option value="Beginner">Anfänger</option>
+                                <option value="Intermediate">Mittelstufe</option>
+                                <option value="Advanced">Fortgeschritten</option>
+                            </select>
+                        </div>
 
-                    <!-- Time -->
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="time"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Zeit</label>
-                        <input type="text" name="time" id="time" placeholder="z.B. 10:00 - 12:00" [(ngModel)]="newCourse.time"
-                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required />
-                    </div>
+                        <div>
+                            <label class="label">Status</label>
+                            <select name="status" [(ngModel)]="newCourse.status" class="input" required>
+                                <option value="active">Aktiv (öffentlich)</option>
+                                <option value="inactive">Inaktiv (versteckt)</option>
+                            </select>
+                        </div>
 
-                    <!-- Instructor -->
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="instructor"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Dozent/in</label>
-                        <input type="text" name="instructor" id="instructor" placeholder="z.B. Fulya Mank" [(ngModel)]="newCourse.instructor"
-                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required />
-                    </div>
+                        <div>
+                            <label class="label">Dauer (Monate)</label>
+                            <input type="number" name="duration" min="1" [(ngModel)]="newCourse.duration" class="input" />
+                        </div>
 
-                    <!-- Price Extern -->
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="priceExtern"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Preis (Extern)</label>
-                        <input type="number" name="priceExtern" id="priceExtern" min="0" step="0.01" placeholder="0.00" [(ngModel)]="newCourse.price.extern"
-                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-                    </div>
+                        <div>
+                            <label class="label">Tage</label>
+                            <input type="text" name="days" [(ngModel)]="newCourse.days" placeholder="z.B. Dienstag & Donnerstag" class="input" />
+                        </div>
 
-                    <!-- Price Intern -->
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="priceIntern"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Preis (Intern)</label>
-                        <input type="number" name="priceIntern" id="priceIntern" min="0" step="0.01" placeholder="0.00" [(ngModel)]="newCourse.price.intern"
-                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-                    </div>
+                        <div>
+                            <label class="label">Zeit</label>
+                            <input type="text" name="time" [(ngModel)]="newCourse.time" placeholder="z.B. 10:00 - 12:00" class="input" />
+                        </div>
 
-                    <!-- Image URL -->
-                    <div class="col-span-6">
-                        <label for="imageUrl"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">BildURL</label>
-                        <input type="url" name="imageUrl" id="imageUrl" placeholder="https://..." [(ngModel)]="newCourse.imageUrl"
-                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required />
-                    </div>
+                        <div>
+                            <label class="label">Preis (Extern)</label>
+                            <input type="number" name="priceExtern" min="0" step="0.01" [(ngModel)]="newCourse.price_extern" class="input" />
+                        </div>
 
-                    <!-- Open for Enrollment -->
-                    <div class="col-span-6">
-                        <label class="flex items-center">
-                            <input type="checkbox" name="isOpenForEnrollment" id="isOpenForEnrollment" [(ngModel)]="newCourse.isOpenForEnrollment"
-                                class="w-4 h-4 rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600" />
-                            <span class="ml-2 text-sm font-medium text-gray-900 dark:text-white">Zur Anmeldung
-                                offen</span>
-                        </label>
-                    </div>
+                        <div class="sm:col-span-2">
+                            <label class="label">Bild-URL</label>
+                            <input type="url" name="imageUrl" [(ngModel)]="newCourse.thumbnail" placeholder="https://..." class="input" />
+                        </div>
 
-                    <!-- Description -->
-                    <div class="col-span-6">
-                        <label for="description"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Beschreibung</label>
-                        <textarea name="description" id="description" rows="3" placeholder="Kursbeschreibung" [(ngModel)]="newCourse.description"
-                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required></textarea>
+                        <div class="sm:col-span-2">
+                            <label class="flex cursor-pointer items-center gap-2.5">
+                                <input type="checkbox" name="isOpenForEnrollment" [(ngModel)]="newCourse.is_open_for_enrollment" class="checkbox" />
+                                <span class="text-sm font-medium text-gray-700">Zur Anmeldung offen</span>
+                            </label>
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label class="label">Beschreibung</label>
+                            <textarea name="description" rows="3" [(ngModel)]="newCourse.description" class="input resize-y" required></textarea>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Footer -->
-                <div
-                    class="flex items-center justify-end gap-3 px-5 pt-5 border-t rounded-b dark:border-gray-700 border-gray-200">
-                    <button type="button" (click)="toggleAddCourseModal()"
-                        class="text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 rounded-lg text-sm px-5 py-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
-                        Abbrechen
-                    </button>
-                    <button type="submit"
-                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700">
-                        Kurs erstellen
+                <div class="flex flex-col-reverse gap-3 border-t border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-end sm:px-6">
+                    <button type="button" (click)="toggleAddCourseModal()" class="btn-secondary btn-md w-full sm:w-auto">Abbrechen</button>
+                    <button type="submit" [disabled]="saving" class="btn-primary btn-md w-full sm:w-auto">
+                        @if (saving) { <span class="animate-pulse">Wird gespeichert…</span> } @else { Kurs erstellen }
                     </button>
                 </div>
             </form>
@@ -153,135 +143,99 @@
 
 <div id="edit-course-modal"
     [hidden]="!showEditCourseModal"
-    class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto bg-gray-900/50 dark:bg-gray-900/60 backdrop-blur-sm">
-    <div class="relative w-full h-full max-w-4xl px-4 md:h-auto">
-        <div class="relative bg-white rounded-lg shadow dark:bg-gray-800">
-            <div class="flex items-start justify-between p-5 border-b rounded-t dark:border-gray-700 border-gray-200">
-                <h3 class="text-xl font-semibold dark:text-white">Kurs bearbeiten</h3>
-                <button type="button"
-                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-700 dark:hover:text-white"
-                    (click)="toggleEditCourseModal()">
+    class="fixed inset-0 z-50 overflow-x-hidden overflow-y-auto bg-gray-900/50 backdrop-blur-sm">
+    <div class="flex min-h-full items-end justify-center p-0 sm:items-center sm:p-4">
+        <div class="relative flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-t-xl bg-white shadow-xl sm:rounded-xl">
+            <div class="flex items-start justify-between gap-4 border-b border-gray-200 p-4 sm:p-5">
+                <h3 class="text-lg font-bold text-gray-900 sm:text-xl">Kurs bearbeiten</h3>
+                <button type="button" class="btn-ghost p-1.5" (click)="toggleEditCourseModal()" aria-label="Schließen">
                     <mat-icon class="w-5 h-5">close</mat-icon>
                 </button>
             </div>
 
-            <form class="p-6 space-y-6" (ngSubmit)="editCourse()">
-                <div class="grid grid-cols-6 gap-6">
-                    <!-- Course Title -->
-                    <div class="col-span-6">
-                        <label for="title"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kurstitel</label>
-                        <input type="text" name="title" id="title" placeholder="z.B. Deutsch A1"
-                        [(ngModel)]="editedCourse.title" name="title"
-                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required />
-                    </div>
+            <form class="flex flex-col overflow-hidden" (ngSubmit)="editCourse()">
+                <div class="space-y-5 overflow-y-auto p-4 sm:p-6">
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                        <div class="sm:col-span-2">
+                            <label class="label">Kurstitel</label>
+                            <input type="text" name="title" [(ngModel)]="editedCourse.title" class="input" required />
+                        </div>
 
-                    <!-- Level -->
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="level"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Niveau</label>
-                        <select name="level" id="level" [(ngModel)]="editedCourse.level" name="level"
-                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required>
-                            <option value="">Wählen Sie...</option>
-                            <option value="Beginner">Anfänger</option>
-                            <option value="Intermediate">Mittelstufe</option>
-                            <option value="Advanced">Fortgeschritten</option>
-                        </select>
-                    </div>
+                        <div>
+                            <label class="label">Lehrkraft</label>
+                            <select name="teacher" [(ngModel)]="editedCourse.teacher_id" class="input" required>
+                                <option value="" disabled>Wählen Sie…</option>
+                                @for (t of teacherOptions; track t.id) {
+                                    <option [value]="t.id">{{ t.name }} ({{ t.role }})</option>
+                                }
+                            </select>
+                        </div>
 
-                    <!-- Duration -->
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="duration" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Dauer
-                            (Monate)</label>
-                        <input type="number" name="duration" id="duration" min="1" placeholder="3" [(ngModel)]="editedCourse.duration"
-                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required />
-                    </div>
+                        <div>
+                            <label class="label">Sprache</label>
+                            <input type="text" name="language" [(ngModel)]="editedCourse.language" class="input" required />
+                        </div>
 
-                    <!-- Days -->
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="days"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tage</label>
-                        <input type="text" name="days" id="days" placeholder="z.B. Dienstag & Donnerstag" [(ngModel)]="editedCourse.days"
-                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required />
-                    </div>
+                        <div>
+                            <label class="label">Niveau</label>
+                            <select name="level" [(ngModel)]="editedCourse.level" class="input" required>
+                                <option value="Beginner">Anfänger</option>
+                                <option value="Intermediate">Mittelstufe</option>
+                                <option value="Advanced">Fortgeschritten</option>
+                            </select>
+                        </div>
 
-                    <!-- Time -->
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="time"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Zeit</label>
-                        <input type="text" name="time" id="time" placeholder="z.B. 10:00 - 12:00" [(ngModel)]="editedCourse.time"
-                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required />
-                    </div>
+                        <div>
+                            <label class="label">Status</label>
+                            <select name="status" [(ngModel)]="editedCourse.status" class="input" required>
+                                <option value="active">Aktiv (öffentlich)</option>
+                                <option value="inactive">Inaktiv (versteckt)</option>
+                            </select>
+                        </div>
 
-                    <!-- Instructor -->
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="instructor"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Dozent/in</label>
-                        <input type="text" name="instructor" id="instructor" placeholder="z.B. Fulya Mank" [(ngModel)]="editedCourse.instructor"
-                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required />
-                    </div>
+                        <div>
+                            <label class="label">Dauer (Monate)</label>
+                            <input type="number" name="duration" min="1" [(ngModel)]="editedCourse.duration" class="input" />
+                        </div>
 
-                    <!-- Price Extern -->
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="priceExtern"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Preis (Extern)</label>
-                        <input type="number" name="priceExtern" id="priceExtern" min="0" step="0.01" placeholder="0.00" [(ngModel)]="editedCourse.price.extern"
-                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-                    </div>
+                        <div>
+                            <label class="label">Tage</label>
+                            <input type="text" name="days" [(ngModel)]="editedCourse.days" class="input" />
+                        </div>
 
-                    <!-- Price Intern -->
-                    <div class="col-span-6 sm:col-span-3">
-                        <label for="priceIntern"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Preis (Intern)</label>
-                        <input type="number" name="priceIntern" id="priceIntern" min="0" step="0.01" placeholder="0.00" [(ngModel)]="editedCourse.price.intern"
-                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-                    </div>
+                        <div>
+                            <label class="label">Zeit</label>
+                            <input type="text" name="time" [(ngModel)]="editedCourse.time" class="input" />
+                        </div>
 
-                    <!-- Image URL -->
-                    <div class="col-span-6">
-                        <label for="imageUrl"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">BildURL</label>
-                        <input type="url" name="imageUrl" id="imageUrl" placeholder="https://..." [(ngModel)]="editedCourse.imageUrl"
-                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required />
-                    </div>
+                        <div>
+                            <label class="label">Preis (Extern)</label>
+                            <input type="number" name="priceExtern" min="0" step="0.01" [(ngModel)]="editedCourse.price_extern" class="input" />
+                        </div>
 
-                    <!-- Open for Enrollment -->
-                    <div class="col-span-6">
-                        <label class="flex items-center">
-                            <input type="checkbox" name="isOpenForEnrollment" id="isOpenForEnrollment" [(ngModel)]="editedCourse.isOpenForEnrollment"
-                                class="w-4 h-4 rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600" />
-                            <span class="ml-2 text-sm font-medium text-gray-900 dark:text-white">Zur Anmeldung
-                                offen</span>
-                        </label>
-                    </div>
+                        <div class="sm:col-span-2">
+                            <label class="label">Bild-URL</label>
+                            <input type="url" name="imageUrl" [(ngModel)]="editedCourse.thumbnail" placeholder="https://..." class="input" />
+                        </div>
 
-                    <!-- Description -->
-                    <div class="col-span-6">
-                        <label for="description"
-                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Beschreibung</label>
-                        <textarea name="description" id="description" rows="3" placeholder="Kursbeschreibung" [(ngModel)]="editedCourse.description"
-                            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required></textarea>
+                        <div class="sm:col-span-2">
+                            <label class="flex cursor-pointer items-center gap-2.5">
+                                <input type="checkbox" name="isOpenForEnrollment" [(ngModel)]="editedCourse.is_open_for_enrollment" class="checkbox" />
+                                <span class="text-sm font-medium text-gray-700">Zur Anmeldung offen</span>
+                            </label>
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label class="label">Beschreibung</label>
+                            <textarea name="description" rows="3" [(ngModel)]="editedCourse.description" class="input resize-y" required></textarea>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Footer -->
-                <div
-                    class="flex items-center justify-end gap-3 px-5 pt-5 border-t rounded-b dark:border-gray-700 border-gray-200">
-                    <button type="button" (click)="toggleEditCourseModal()"
-                        class="text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 rounded-lg text-sm px-5 py-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
-                        Abbrechen
-                    </button>
-                    <button type="submit"
-                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700">
-                        Kurs bearbeiten
+                <div class="flex flex-col-reverse gap-3 border-t border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-end sm:px-6">
+                    <button type="button" (click)="toggleEditCourseModal()" class="btn-secondary btn-md w-full sm:w-auto">Abbrechen</button>
+                    <button type="submit" [disabled]="saving" class="btn-primary btn-md w-full sm:w-auto">
+                        @if (saving) { <span class="animate-pulse">Wird gespeichert…</span> } @else { Kurs speichern }
                     </button>
                 </div>
             </form>

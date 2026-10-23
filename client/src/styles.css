@@ -1,4 +1,142 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global design system — Sprachschule Mank */
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Brand tokens (derived from the logo: maroon + orange) */
+@theme {
+  --color-brand: #551025;
+  --color-brand-50: #faf3f6;
+  --color-brand-100: #f3e2ea;
+  --color-brand-200: #e5c3d2;
+  --color-brand-300: #d094ab;
+  --color-brand-400: #b15f80;
+  --color-brand-500: #8c3a5c;
+  --color-brand-600: #6e2040;
+  --color-brand-700: #551025;
+  --color-brand-800: #3f0c1b;
+  --color-brand-900: #2b0812;
+  --color-brand-950: #1a040a;
+
+  --color-accent: #d93b18;
+  --color-accent-50: #fdf3ef;
+  --color-accent-100: #fce4da;
+  --color-accent-200: #f8c4b0;
+  --color-accent-500: #e04e28;
+  --color-accent-600: #d93b18;
+  --color-accent-700: #b52d10;
+
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+
+  --shadow-card: 0 1px 2px 0 rgb(35 8 18 / 0.05), 0 1px 3px 0 rgb(35 8 18 / 0.08);
+  --shadow-card-hover: 0 4px 6px -1px rgb(35 8 18 / 0.1), 0 2px 4px -2px rgb(35 8 18 / 0.1);
+}
+
+/* ---------- Base ---------- */
+body {
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  color: #1f2937;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Fluid page title */
+.page-title {
+  font-size: clamp(1.75rem, 1.25rem + 2vw, 2.25rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+/* Admin-authored page content: keep embedded media responsive */
+[innerHTML] img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ---------- Form elements ---------- */
+@layer components {
+  .input {
+    @apply w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 shadow-sm transition placeholder:text-gray-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/25 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100;
+  }
+
+  @media (min-width: 640px) {
+    .input {
+      @apply px-4 py-2.5 text-base;
+    }
+  }
+
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-gray-700;
+  }
+
+  .checkbox {
+    @apply h-4 w-4 shrink-0 rounded border-gray-300 accent-brand-600;
+  }
+
+  .btn-primary {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg font-semibold transition focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-1 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 bg-brand-600 text-white shadow-sm hover:bg-brand-700 active:bg-brand-800;
+  }
+
+  .btn-secondary {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg font-semibold transition focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-1 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50;
+  }
+
+  .btn-ghost {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg font-semibold transition focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-1 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 text-gray-600 hover:bg-gray-100 hover:text-gray-900;
+  }
+
+  .btn-danger {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg font-semibold transition focus-visible:ring-2 focus-visible:ring-red-500/40 focus-visible:ring-offset-1 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 bg-red-600 text-white shadow-sm hover:bg-red-700;
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-sm;
+  }
+
+  .btn-md {
+    @apply px-4 py-2.5 text-sm;
+  }
+
+  @media (min-width: 640px) {
+    .btn-md {
+      @apply px-5 text-base;
+    }
+  }
+
+  .card {
+    @apply rounded-xl border border-gray-100 bg-white shadow-[var(--shadow-card)];
+  }
+
+  .alert-error {
+    @apply rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800;
+  }
+
+  .alert-success {
+    @apply rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-800;
+  }
+
+  .alert-info {
+    @apply rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800;
+  }
+
+  .table-wrapper {
+    @apply w-full overflow-x-auto;
+  }
+
+  .table {
+    @apply w-full min-w-[560px] text-left text-sm;
+  }
+
+  .table th {
+    @apply border-b border-gray-200 bg-gray-50 px-4 py-3 font-semibold text-gray-600;
+  }
+
+  .table td {
+    @apply border-b border-gray-100 px-4 py-3;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+}

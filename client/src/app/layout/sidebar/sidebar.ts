@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService, User } from '../../core/services/auth.service';
 
@@ -24,12 +24,20 @@ export interface SidebarItem {
   styleUrls: ['./sidebar.css'],
 })
 export class Sidebar implements OnInit {
+  @Output() closeRequested = new EventEmitter<void>();
+
   menuItems: SidebarItem[] = [];
 
   constructor(private router: Router, private auth: AuthService) {}
 
   ngOnInit(): void {
     this.menuItems = this.getMenuForRole(this.auth.getUser()?.role || 'student');
+    // Close the drawer (mobile) whenever navigation is triggered from the sidebar.
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.closeRequested.emit();
+      }
+    });
   }
 
   get user(): User | null {
@@ -68,6 +76,7 @@ export class Sidebar implements OnInit {
     const menus: { [key: string]: SidebarItem[] } = {
       admin: [
         { label: 'Dashboard', route: '/admin/dashboard', icon: 'space_dashboard' },
+        { label: 'Buchungen', route: '/admin/bookings', icon: 'request_quote' },
         {
           label: 'Verwaltung',
           route: '',
@@ -76,6 +85,7 @@ export class Sidebar implements OnInit {
             { label: 'Benutzer', route: '/admin/users', icon: 'person' },
             { label: 'Benutzer anlegen', route: '/admin/create-user', icon: 'person_add' },
             { label: 'Kurse', route: '/admin/courses', icon: 'menu_book' },
+            { label: 'Seiten & Inhalte', route: '/admin/pages', icon: 'description' },
           ],
         },
         {

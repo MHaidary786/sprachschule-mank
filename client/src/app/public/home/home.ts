@@ -1,13 +1,11 @@
 import { Component } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import {SiCloudArrowUpIcon, SiLockClosedIcon, SiInboxStackIcon } from '@semantic-icons/heroicons/24/solid';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-home',
-  imports: [MatIconModule, SiCloudArrowUpIcon, SiLockClosedIcon, SiInboxStackIcon],
+  imports: [MatIconModule, RouterLink],
   templateUrl: './home.html',
-  styleUrl: './home.css',
+  styleUrls: ['./home.css'],
 })
-export class Home {
-
-}
+export class Home {}

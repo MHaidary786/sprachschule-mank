@@ -1,0 +1,142 @@
+<main class="p-4 sm:p-6">
+  <div class="mb-6">
+    <h2 class="page-title text-gray-900">Buchungsanfragen</h2>
+    <p class="mt-1 text-sm text-gray-500">Anfragen von Interessenten zu Kursen verwalten.</p>
+  </div>
+
+  @if (error) {
+    <div class="alert-error mb-4">{{ error }}</div>
+  }
+  @if (success) {
+    <div class="alert-success mb-4">{{ success }}</div>
+  }
+
+  <!-- Status filter -->
+  <div class="mb-5 flex flex-wrap gap-2">
+    @for (tab of tabs; track tab.value) {
+      <button
+        type="button"
+        (click)="setFilter(tab.value)"
+        class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-1 focus-visible:outline-none"
+        [ngClass]="status === tab.value
+          ? 'bg-brand-600 text-white shadow-sm'
+          : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'"
+      >
+        <span>{{ tab.label }}</span>
+        @if (tab.value === 'pending' && pendingCount > 0) {
+          <span
+            class="inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-bold"
+            [ngClass]="status === 'pending' ? 'bg-white/20 text-white' : 'bg-brand-100 text-brand-700'"
+          >
+            {{ pendingCount }}
+          </span>
+        }
+      </button>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="card flex items-center gap-3 p-6 text-gray-500">
+      <mat-icon class="animate-spin text-brand-500">refresh</mat-icon>
+      <span>Wird geladen…</span>
+    </div>
+  } @else if (bookings.length === 0) {
+    <div class="card flex flex-col items-center gap-3 p-10 text-center">
+      <div class="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
+        <mat-icon class="text-3xl text-gray-400">inbox</mat-icon>
+      </div>
+      <p class="font-medium text-gray-600">Keine Buchungsanfragen in dieser Ansicht.</p>
+    </div>
+  } @else {
+    <div class="space-y-4">
+      @for (b of bookings; track b.id) {
+        <article class="card p-5">
+          <!-- Top row: identity + status -->
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <h3 class="text-lg font-bold text-gray-900">{{ b.name }}</h3>
+                <span [ngClass]="statusBadgeClass(b.status)">{{ statusLabel(b.status) }}</span>
+              </div>
+              <div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500">
+                <a href="mailto:{{ b.email }}" class="inline-flex items-center gap-1 hover:text-brand-600 hover:underline">
+                  <mat-icon class="text-base">mail</mat-icon>
+                  <span>{{ b.email }}</span>
+                </a>
+                @if (b.phone) {
+                  <a href="tel:{{ b.phone }}" class="inline-flex items-center gap-1 hover:text-brand-600 hover:underline">
+                    <mat-icon class="text-base">call</mat-icon>
+                    <span>{{ b.phone }}</span>
+                  </a>
+                }
+                @if (b.created_at) {
+                  <span class="inline-flex items-center gap-1">
+                    <mat-icon class="text-base">schedule</mat-icon>
+                    <span>{{ b.created_at | date: 'dd.MM.yyyy HH:mm' }}</span>
+                  </span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Course chip -->
+          <div class="mt-4">
+            <span
+              class="inline-flex items-center gap-2 rounded-full border border-brand-100 bg-brand-50 px-3 py-1.5 text-sm font-medium text-brand-700"
+            >
+              <mat-icon class="text-base">menu_book</mat-icon>
+              <span>{{ b.course_title }}</span>
+              @if (b.level) {
+                <span class="rounded-full bg-brand-100 px-2 py-0.5 text-xs font-semibold text-brand-700">{{ b.level }}</span>
+              }
+            </span>
+          </div>
+
+          <!-- Message -->
+          @if (b.message) {
+            <div class="mt-4 rounded-lg bg-gray-50 p-3 text-gray-600">{{ b.message }}</div>
+          }
+
+          <!-- Assigned student -->
+          @if (b.status === 'approved' && b.student_name) {
+            <p class="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-green-700">
+              <mat-icon class="text-base">person_check</mat-icon>
+              <span>Zugeteilt als Student: {{ b.student_name }}</span>
+            </p>
+          }
+
+          <!-- Admin note -->
+          @if (b.admin_note) {
+            <div class="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+              <span class="font-semibold">Bemerkung:</span> {{ b.admin_note }}
+            </div>
+          }
+
+          <!-- Actions (pending only) -->
+          @if (b.status === 'pending') {
+            <div class="mt-5 flex flex-wrap items-center gap-2 border-t border-gray-100 pt-4">
+              <button
+                type="button"
+                class="btn-primary btn-sm"
+                [disabled]="busy === b.id"
+                (click)="approve(b)"
+              >
+                <mat-icon class="text-base">check_circle</mat-icon>
+                <span>Bestätigen</span>
+              </button>
+              <button
+                type="button"
+                class="btn-ghost btn-sm text-red-600 hover:text-red-700"
+                [disabled]="busy === b.id"
+                (click)="reject(b)"
+              >
+                <mat-icon class="text-base">cancel</mat-icon>
+                <span>Ablehnen</span>
+              </button>
+            </div>
+          }
+        </article>
+      }
+    </div>
+  }
+</main>

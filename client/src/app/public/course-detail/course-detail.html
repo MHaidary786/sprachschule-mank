@@ -1,0 +1,256 @@
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+  @if (loading) {
+    <div class="flex items-center gap-3 py-16 text-gray-500">
+      <mat-icon class="animate-spin">refresh</mat-icon>
+      Kurs wird geladen …
+    </div>
+  } @else if (notFound || !course) {
+    <div class="card flex flex-col items-center gap-3 p-12 text-center">
+      <span class="flex h-16 w-16 items-center justify-center rounded-full bg-brand-50 text-brand-400">
+        <mat-icon class="text-4xl">search_off</mat-icon>
+      </span>
+      <h2 class="page-title text-gray-900">Kurs nicht gefunden</h2>
+      <p class="max-w-md text-sm text-gray-500">
+        Der angeforderte Kurs existiert nicht mehr oder wurde entfernt.
+      </p>
+      <a routerLink="/courses" class="btn-primary btn-md mt-2">
+        <mat-icon class="text-base">arrow_back</mat-icon>
+        Zur Kursliste
+      </a>
+    </div>
+  } @else {
+    <a
+      routerLink="/courses"
+      class="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition-colors hover:text-brand-600"
+    >
+      <mat-icon class="text-base">arrow_back</mat-icon>
+      Zurück zur Kursliste
+    </a>
+
+    <div class="lg:grid lg:grid-cols-[1fr_380px] lg:items-start lg:gap-10">
+      <!-- ===== Main column ===== -->
+      <div class="min-w-0 space-y-8">
+        <!-- Banner: title block -->
+        <header>
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="badge bg-brand-100 text-brand-700">{{ course.language }}</span>
+            <span class="badge bg-accent-100 text-accent-700">{{ course.level }}</span>
+          </div>
+          <h1 class="page-title mt-3 text-gray-900">{{ course.title }}</h1>
+          <p class="mt-3 flex items-center gap-2 text-sm font-medium text-gray-600">
+            <mat-icon class="text-xl text-brand-500">person</mat-icon>
+            {{ course.teacher_name || 'Sprachschule Mank' }}
+          </p>
+        </header>
+
+        <!-- Cover image -->
+        <div class="relative overflow-hidden rounded-xl bg-gray-100">
+          <img
+            [src]="course.thumbnail || 'https://picsum.photos/1200/675'"
+            [alt]="course.title"
+            class="aspect-video w-full object-cover"
+          />
+          <span class="badge absolute left-4 top-4 bg-brand-600/95 text-white shadow">
+            {{ course.level }}
+          </span>
+        </div>
+
+        <!-- About -->
+        <section>
+          <h2 class="text-lg font-bold text-gray-900 sm:text-xl">Über diesen Kurs</h2>
+          <p class="mt-3 whitespace-pre-line text-gray-600 leading-relaxed">{{ course.description }}</p>
+        </section>
+
+        <!-- Facts -->
+        <section class="card p-5 sm:p-6">
+          <h2 class="text-lg font-bold text-gray-900 sm:text-xl">Kursdetails</h2>
+          <dl class="mt-4 grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide text-gray-400">Level</dt>
+              <dd class="mt-0.5 font-semibold text-gray-800">{{ course.level }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide text-gray-400">Sprache</dt>
+              <dd class="mt-0.5 font-semibold text-gray-800">{{ course.language }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide text-gray-400">Dauer</dt>
+              <dd class="mt-0.5 font-semibold text-gray-800">{{ durationLabel() }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide text-gray-400">Tage</dt>
+              <dd class="mt-0.5 font-semibold text-gray-800">{{ course.days || '—' }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide text-gray-400">Zeit</dt>
+              <dd class="mt-0.5 font-semibold text-gray-800">{{ course.time || '—' }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide text-gray-400">Preis Extern</dt>
+              <dd class="mt-0.5 font-semibold text-gray-800">
+                @if (priceExtern() !== null) {
+                  € {{ priceExtern() }},- / Monat
+                } @else {
+                  Auf Anfrage
+                }
+              </dd>
+            </div>
+            @if (priceIntern() !== null) {
+              <div>
+                <dt class="text-xs font-medium uppercase tracking-wide text-gray-400">Preis Kursteilnehmende</dt>
+                <dd class="mt-0.5 font-semibold text-gray-800">€ {{ priceIntern() }},- / Monat</dd>
+              </div>
+            }
+          </dl>
+        </section>
+
+        <!-- Instructor -->
+        <section>
+          <h2 class="text-lg font-bold text-gray-900 sm:text-xl">Ihre Lehrkraft</h2>
+          <div class="card mt-4 flex items-center gap-4 p-5">
+            <span
+              class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-100 text-lg font-bold text-brand-700"
+            >
+              <img src="assets/logo.png" alt="" class="h-full w-full object-cover" />
+            </span>
+            <div class="min-w-0">
+              <p class="font-semibold text-gray-900">{{ course.teacher_name || 'Sprachschule Mank' }}</p>
+              <p class="text-sm text-gray-500">
+                Persönliche Betreuung, praxisnaher Unterricht und ein freundliches Lernumfeld in Mank.
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ===== Sidebar: booking card (below content on mobile, sticky at lg) ===== -->
+      <aside class="mt-10 lg:mt-0 lg:sticky lg:top-24">
+        <div class="card p-5 sm:p-6">
+          <p class="text-sm text-gray-500">
+            <span class="text-2xl font-extrabold text-brand-600 sm:text-3xl">
+              @if (priceExtern() !== null) {
+                € {{ priceExtern() }},-
+              } @else {
+                Auf Anfrage
+              }
+            </span>
+            @if (priceExtern() !== null) {
+              &nbsp;/ Monat
+            }
+          </p>
+          @if (priceIntern() !== null) {
+            <p class="mt-1 text-sm text-gray-500">
+              Für Kursteilnehmende:
+              <span class="font-bold text-brand-600">€ {{ priceIntern() }},- / Monat</span>
+            </p>
+          }
+
+          @if (!course.is_open_for_enrollment) {
+            <div class="alert-error mt-5">Dieser Kurs ist leider ausgebucht.</div>
+          } @else if (success) {
+            <div class="alert-success mt-5 flex items-start gap-2.5">
+              <mat-icon class="mt-0.5 text-base text-green-600">check_circle</mat-icon>
+              <span>
+                Vielen Dank für Ihre Anfrage! Wir melden uns bei Ihnen, um Ihren
+                Platz zu bestätigen.
+              </span>
+            </div>
+          } @else {
+            <h3 class="mt-5 text-base font-bold text-gray-900">Kurs buchen</h3>
+            @if (submitError) {
+              <div class="alert-error mt-3">{{ submitError }}</div>
+            }
+            <form
+              #bookForm="ngForm"
+              (ngSubmit)="onSubmit(bookForm)"
+              class="mt-4 space-y-4"
+              novalidate
+            >
+              <div>
+                <label for="booking-name" class="label">Name*</label>
+                <input
+                  id="booking-name"
+                  type="text"
+                  name="name"
+                  [ngModel]
+                  class="input"
+                  placeholder="Ihr Name"
+                  autocomplete="name"
+                  required
+                />
+              </div>
+              <div>
+                <label for="booking-email" class="label">E-Mail*</label>
+                <input
+                  id="booking-email"
+                  type="email"
+                  name="email"
+                  [ngModel]
+                  class="input"
+                  placeholder="ihre@email.de"
+                  autocomplete="email"
+                  required
+                />
+              </div>
+              <div>
+                <label for="booking-phone" class="label">
+                  Telefon <span class="font-normal text-gray-400">(optional)</span>
+                </label>
+                <input
+                  id="booking-phone"
+                  type="tel"
+                  name="phone"
+                  [ngModel]
+                  class="input"
+                  placeholder="+43 …"
+                  autocomplete="tel"
+                />
+              </div>
+              <div>
+                <label for="booking-message" class="label">
+                  Nachricht <span class="font-normal text-gray-400">(optional)</span>
+                </label>
+                <textarea
+                  id="booking-message"
+                  name="message"
+                  [ngModel]
+                  rows="3"
+                  class="input resize-y"
+                  placeholder="Ihre Nachricht an uns …"
+                ></textarea>
+              </div>
+
+              <label class="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  name="consent"
+                  [ngModel]
+                  class="checkbox mt-0.5"
+                  required
+                />
+                <span class="text-sm text-gray-600">
+                  Ich habe die Datenschutzerklärung gelesen und bin mit der
+                  Speicherung meiner Daten zur Bearbeitung meiner Anfrage
+                  einverstanden.*
+                </span>
+              </label>
+
+              <button
+                type="submit"
+                class="btn-primary btn-md w-full"
+                [disabled]="submitting"
+              >
+                @if (submitting) {
+                  Wird gesendet …
+                } @else {
+                  <mat-icon class="text-base">send</mat-icon>
+                  Anfrage senden
+                }
+              </button>
+            </form>
+          }
+        </div>
+      </aside>
+    </div>
+  }
+</div>

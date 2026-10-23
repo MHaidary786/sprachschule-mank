@@ -1,150 +1,191 @@
 import { Component, OnInit } from '@angular/core';
-import { Course, CourseCard } from '../../../shared/components/course-card/course-card';
 import { Router } from '@angular/router';
-import { MatAnchor } from "@angular/material/button";
-import { MatIcon } from "@angular/material/icon";
 import { FormsModule } from '@angular/forms';
+import { MatIcon } from '@angular/material/icon';
+import { CourseCard } from '../../../shared/components/course-card/course-card';
+import { CourseService, ApiCourse, CourseInput, CourseUpdate } from '../../../core/services/course.service';
+import { UserService } from '../../../core/services/user.service';
+import { User } from '../../../core/services/auth.service';
+
+interface FormModel {
+  id: number;
+  teacher_id: number | '';
+  title: string;
+  description: string;
+  language: string;
+  level: 'Beginner' | 'Intermediate' | 'Advanced';
+  status: 'active' | 'inactive';
+  thumbnail: string;
+  duration: number | '';
+  days: string;
+  time: string;
+  price_extern: number | '';
+  price_intern: number | '';
+  is_open_for_enrollment: boolean;
+}
+
+const emptyForm = (): FormModel => ({
+  id: 0,
+  teacher_id: '',
+  title: '',
+  description: '',
+  language: 'Deutsch',
+  level: 'Beginner',
+  status: 'active',
+  thumbnail: '',
+  duration: '',
+  days: '',
+  time: '',
+  price_extern: '',
+  price_intern: '',
+  is_open_for_enrollment: true,
+});
 
 @Component({
   selector: 'app-courses',
   standalone: true,
   templateUrl: './courses.html',
   styleUrl: './courses.css',
-  imports: [CourseCard, MatAnchor, MatIcon, FormsModule],
+  imports: [CourseCard, MatIcon, FormsModule],
 })
 export class Courses implements OnInit {
-  newCourse: Course = {
-  id: 0,
-  title: '',
-  description: '',
-  duration: 0,
-  days: '',
-  level: 'Beginner',
-  instructor: '',
-  time: '',
-  price: { extern: null, intern: null },
-  imageUrl: '',
-  isOpenForEnrollment: false
-};
-
-  editedCourse: Course = {
-  id: 0,
-  title: '',
-  description: '',
-  duration: 0,
-  days: '',
-  level: 'Beginner',
-  instructor: '',
-  time: '',
-  price: { extern: null, intern: null },
-  imageUrl: '',
-  isOpenForEnrollment: false
-};
+  courses: ApiCourse[] = [];
+  teachers: User[] = [];
+  loading = true;
+  error = '';
 
   showAddCourseModal = false;
   showEditCourseModal = false;
-  
+  newCourse: FormModel = emptyForm();
+  editedCourse: FormModel = emptyForm();
+  saving = false;
+
+  constructor(private router: Router, private courseService: CourseService, private userService: UserService) {}
+
+  ngOnInit(): void {
+    this.loadCourses();
+    this.userService
+      .getAll(200, 0)
+      .subscribe((users) => (this.teachers = users.filter((u) => u.role !== 'student')));
+  }
+
+  get teacherOptions(): User[] {
+    return this.teachers;
+  }
+
+  private loadCourses(): void {
+    this.error = '';
+    this.courseService.getAllCourses().subscribe({
+      next: (data) => {
+        this.courses = data;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = err?.error?.message || 'Kurse konnten nicht geladen werden.';
+        this.loading = false;
+      },
+    });
+  }
+
   toggleAddCourseModal(): void {
+    if (!this.showAddCourseModal) this.newCourse = emptyForm();
     this.showAddCourseModal = !this.showAddCourseModal;
+  }
+
+  startEdit(course: ApiCourse): void {
+    this.editedCourse = {
+      id: course.id,
+      teacher_id: course.teacher_id,
+      title: course.title,
+      description: course.description,
+      language: course.language,
+      level: course.level as FormModel['level'],
+      status: course.status as FormModel['status'],
+      thumbnail: course.thumbnail || '',
+      duration: course.duration ?? '',
+      days: course.days || '',
+      time: course.time || '',
+      price_extern: course.price_extern === null || course.price_extern === undefined ? '' : Number(course.price_extern),
+      price_intern: course.price_intern === null || course.price_intern === undefined ? '' : Number(course.price_intern),
+      is_open_for_enrollment: !!course.is_open_for_enrollment,
+    };
+    this.showEditCourseModal = true;
+  }
+
+  toCard(course: ApiCourse) {
+    return this.courseService.toCard(course);
   }
 
   toggleEditCourseModal(): void {
     this.showEditCourseModal = !this.showEditCourseModal;
   }
 
-  createCourse(): void {
-    // Logic to create a new course
-      alert('New course has been created.');
-
-      this.courses.push({ ...this.newCourse, id: this.courses.length + 1 });
-
-    this.toggleAddCourseModal();
-  }
-
-  editCourse(): void {
-    // Logic to edit an existing course
-    const index = this.courses.findIndex(course => course.id === this.editedCourse.id);
-    if (index !== -1) {
-      this.courses[index] = { ...this.editedCourse };
-    }
-
-      alert('Course has been updated.');
-    this.toggleEditCourseModal();
-  }
-
-  courses: Course[] = [];
-
-    constructor(private router: Router) {}
-
-  
-  ngOnInit(): void {
-    this.initializeCourses();
-  }
-
-  onCourseCardClick($event: Course) {
+  onCourseCardClick($event: { id: number }): void {
     this.router.navigate(['/courses', $event.id]);
   }
 
-  private initializeCourses(): void {
-    this.courses = [
-      {
-        id: 1,
-        title: 'German Basics',
-        description: 'Learn fundamental German grammar and vocabulary',
-        duration: 3,
-        days: 'Tuesday & Thursday',
-        level: 'Beginner',
-        instructor: 'Fulya Mank',
-        time: '10:00 AM - 12:00 PM',
-        price: { extern: 150, intern: 100 },
-        imageUrl: 'https://picsum.photos/800/600',
-        isOpenForEnrollment: true,
-      },
-      {
-        id: 2,
-        title: 'German Conversation',
-        description: 'Improve your speaking and listening skills',
-        duration: 2,
-        days: 'Monday & Wednesday',
-        level: 'Intermediate',
-        instructor: 'Fulya Mank',
-        time: '2:00 PM - 4:00 PM',
-        price: { extern: 200, intern: 150 },
-        imageUrl: 'https://picsum.photos/800/600',
-        isOpenForEnrollment: false,
-      },
-      {
-        id: 3,
-        title: 'German Basics',
-        description: 'Improve your speaking and listening skills',
-        duration: 2,
-        days: 'Monday & Wednesday',
-        level: 'Intermediate',
-        instructor: 'Fulya Mank',
-        time: '2:00 PM - 4:00 PM',
-        price: { extern: 200, intern: null },
-        imageUrl: 'https://picsum.photos/800/600',
-        isOpenForEnrollment: true,
-      },
-      {
-        id: 4,
-        title: 'German Conversation',
-        description: 'Improve your speaking and listening skills',
-        duration: 2,
-        days: 'Monday & Wednesday',
-        level: 'Intermediate',
-        instructor: 'Fulya Mank',
-        time: '2:00 PM - 4:00 PM',
-        price: { extern: 200, intern: 150 },
-        imageUrl: 'https://picsum.photos/800/600',
-        isOpenForEnrollment: true,
-      },
-    ];
+  private toPayload(form: FormModel): CourseInput | CourseUpdate {
+    const p: CourseUpdate = {
+      title: form.title,
+      description: form.description,
+      language: form.language,
+      level: form.level,
+      status: form.status,
+      thumbnail: form.thumbnail || null,
+      duration: form.duration === '' ? null : Number(form.duration),
+      days: form.days || null,
+      time: form.time || null,
+      price_extern: form.price_extern === '' ? null : Number(form.price_extern),
+      price_intern: form.price_intern === '' ? null : Number(form.price_intern),
+      is_open_for_enrollment: form.is_open_for_enrollment,
+    };
+    if (form.teacher_id !== '') p.teacher_id = Number(form.teacher_id);
+    return p;
   }
-  confirmRemove(courseName: string): void {
-    if (confirm(`Are you sure you want to remove ${courseName}?`)) {
-      // Logic to remove the course
-      alert(`${courseName} has been removed.`);
+
+  createCourse(): void {
+    if (this.newCourse.teacher_id === '') {
+      this.error = 'Bitte eine Lehrkraft auswählen.';
+      return;
     }
+    this.saving = true;
+    this.courseService.createCourse(this.toPayload(this.newCourse) as CourseInput).subscribe({
+      next: () => {
+        this.saving = false;
+        this.toggleAddCourseModal();
+        this.loadCourses();
+      },
+      error: (err) => {
+        this.saving = false;
+        this.error = err?.error?.details
+          ? err.error.details.map((d: { field: string; message: string }) => `${d.field}: ${d.message}`).join(', ')
+          : err?.error?.message || 'Kurs konnte nicht erstellt werden.';
+      },
+    });
+  }
+
+  editCourse(): void {
+    this.saving = true;
+    this.courseService.updateCourse(this.editedCourse.id, this.toPayload(this.editedCourse)).subscribe({
+      next: () => {
+        this.saving = false;
+        this.toggleEditCourseModal();
+        this.loadCourses();
+      },
+      error: (err) => {
+        this.saving = false;
+        this.error = err?.error?.details
+          ? err.error.details.map((d: { field: string; message: string }) => `${d.field}: ${d.message}`).join(', ')
+          : err?.error?.message || 'Kurs konnte nicht aktualisiert werden.';
+      },
+    });
+  }
+
+  confirmRemove(course: ApiCourse): void {
+    if (!confirm(`Kurs "${course.title}" wirklich löschen? Auch alle zugeordneten Eintragungen.`)) return;
+    this.courseService.deleteCourse(course.id).subscribe({
+      next: () => this.loadCourses(),
+      error: (err) => (this.error = err?.error?.message || 'Löschen fehlgeschlagen'),
+    });
   }
 }

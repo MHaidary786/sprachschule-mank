@@ -39,11 +39,11 @@
             "styles": [
               "src/custom-theme.scss",
               "src/styles.css"
-            ],
-            "baseHref": "/sprachschule-mank/"
+            ]
           },
           "configurations": {
             "production": {
+              "baseHref": "/sprachschule-mank/",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.development.ts",
