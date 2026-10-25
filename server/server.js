@@ -6,7 +6,7 @@ require('dotenv').config();
 
 const { client } = require('./config/db');
 const initDB = require('./initDB');
-const ensureData = require('./scripts/ensure-data');
+const ensureAdmin = require('./scripts/ensure-admin');
 
 const authRoutes = require('./routes/authRoutes');
 const studentRoutes = require('./routes/studentRoutes');
@@ -87,8 +87,13 @@ async function startServer() {
         console.log('Database connected successfully.');
         await initDB();
         console.log('Tables initialized.');
-        // await ensureData();
-        // console.log('Seeding complete (admin + demo data).');
+        // Confirm an administrator exists (check only; warns if not).
+        // A failure here must not prevent the public site from starting.
+        try {
+            await ensureAdmin();
+        } catch (err) {
+            console.warn('ensure-admin: check failed (server will continue):', err.message);
+        }
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
         });

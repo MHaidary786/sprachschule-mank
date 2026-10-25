@@ -74,8 +74,25 @@ if not exist "server\node_modules" (
 echo Server dependencies OK.
 echo.
 
-rem ---------- 3. Install client dependencies ----------
-echo [3/5] Checking Angular dependencies...
+rem ---------- 3. Create the first administrator ----------
+echo [3/5] Creating the first administrator...
+echo.
+echo  A new window opens for the administrator setup.
+echo  - If an administrator already exists, it exits immediately.
+echo  - On the very first run, enter the name, email and password there.
+echo.
+
+rem The setup runs in its own window (a separate console keeps the Node
+rem prompt/input from interfering with this batch file). The window stays open
+rem until you close it. If no admin exists when the server starts, it will
+rem warn in the API window - the public site still works, the admin area just
+rem stays locked until you finish the setup window.
+start "Sprachschule Mank - Create Admin" cmd /k "cd /d ""%~dp0server"" && node scripts/create-admin.js && echo. && echo Finished. You can close this window."
+timeout /t 2 /nobreak >nul
+echo.
+
+rem ---------- 4. Install client dependencies ----------
+echo [4/5] Checking Angular dependencies...
 
 if not exist "client\package.json" (
     echo [ERROR] client\package.json was not found.
@@ -104,8 +121,8 @@ if not exist "client\node_modules" (
 echo Client dependencies OK.
 echo.
 
-rem ---------- 4. Build Angular ----------
-echo [4/5] Building the Angular website...
+rem ---------- 5. Build Angular ----------
+echo [5/5] Building the Angular website...
 
 pushd client || exit /b 1
 call npm run build

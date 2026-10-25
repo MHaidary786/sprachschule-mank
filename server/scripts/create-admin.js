@@ -12,6 +12,16 @@ const MIN_PASSWORD_LENGTH = 10;
 // ---------- Terminal input helpers ----------
 
 function ask(question) {
+    // In an unattended context (the start .bat files run this before the server
+    // boots, with no terminal) readline would hang forever if a value is missing.
+    // Fail fast with an actionable message instead.
+    if (!process.stdin.isTTY || !process.stdout.isTTY) {
+        return Promise.reject(new Error(
+            'Interactive input requires a terminal. ' +
+            'Run the start .bat file in a console window, or pass --name and --email explicitly.'
+        ));
+    }
+
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout
@@ -31,7 +41,7 @@ function askPassword(question) {
         if (!process.stdin.isTTY || !process.stdin.setRawMode) {
             reject(new Error(
                 'Hidden password input requires an interactive terminal. ' +
-                'Use --email and --password or configure ADMIN_EMAIL and ADMIN_PASSWORD.'
+                'Run the start .bat file, or pass --name, --email and --password explicitly.'
             ));
             return;
         }
@@ -137,6 +147,17 @@ function validatePassword(password) {
 
 // ---------- Create the first administrator ----------
 
+// On a true first start the schema may not exist yet. server.js normally runs
+// initDB() at boot to create the tables, but on the very first start the batch
+// files run create-admin.js *before* `npm run dev` boots the server, so this
+// script must guarantee the users table itself exists before it can read it.
+// We reuse User.initTable() so the schema stays identical to the rest of the app.
+const User = require('../models/User');
+
+async function ensureUsersTable() {
+    await User.initTable();
+}
+
 async function createAdmin() {
     let connected = false;
 
@@ -145,6 +166,8 @@ async function createAdmin() {
 
         await client.connect();
         connected = true;
+
+        await ensureUsersTable();
 
         // Never modify an existing administrator.
         const existingAdmin = await client.query(
@@ -167,9 +190,22 @@ async function createAdmin() {
         console.log('==================================================');
         console.log('');
 
-        let email = (options.email || process.env.ADMIN_EMAIL || '').trim();
-        let name = (options.name || process.env.ADMIN_NAME || '').trim();
-        let password = options.password || process.env.ADMIN_PASSWORD || '';
+        // Credentials are entered here in the console (the start .bat file runs
+        // this script before the server boots, while the prompt window is open).
+        // They are never read from .env. --name/--email/--password are available
+        // only as a manual escape hatch.
+        let name = (options.name || '').trim();
+        let email = (options.email || '').trim();
+        let password = options.password || '';
+
+        // Name
+        while (!name) {
+            name = await ask('Administrator full name: ');
+
+            if (!name) {
+                console.log('Name cannot be empty.');
+            }
+        }
 
         // Email
         while (!email || !validateEmail(email)) {
@@ -195,44 +231,38 @@ async function createAdmin() {
             );
         }
 
-        // Name
-        while (!name) {
-            name = await ask('Administrator full name: ');
-
-            if (!name) {
-                console.log('Name cannot be empty.');
+        // Password: use a valid --password flag if given, otherwise prompt
+        // interactively (hidden input + confirmation). Requires a real terminal.
+        if (!password || validatePassword(password)) {
+            const error = password ? validatePassword(password) : null;
+            if (error) {
+                console.log(`[WARNING] Provided --password is not strong enough (${error}).`);
+                console.log('Falling back to interactive password entry.');
             }
-        }
-
-        // Password and confirmation
-        while (true) {
-            if (!password) {
-                password = await askPassword('Password (hidden): ');
+            while (true) {
+                const entered = await askPassword('Password (hidden): ');
+                const passwordError = validatePassword(entered);
+                if (passwordError) {
+                    console.log(passwordError);
+                    continue;
+                }
+                const confirmation = await askPassword('Confirm password: ');
+                if (entered !== confirmation) {
+                    console.log('Passwords do not match. Please try again.');
+                    continue;
+                }
+                password = entered;
+                break;
             }
-
-            const passwordError = validatePassword(password);
-
-            if (passwordError) {
-                console.log(passwordError);
-                password = '';
-                continue;
-            }
-
-            const confirmation = await askPassword('Confirm password: ');
-
-            if (password !== confirmation) {
-                console.log('Passwords do not match. Please try again.');
-                password = '';
-                continue;
-            }
-
-            break;
         }
 
         const hash = await bcrypt.hash(password, 12);
 
-        // Recheck inside a transaction to reduce the risk of two
-        // simultaneous first-run processes creating administrators.
+        // Recheck and insert inside a transaction to reduce the risk of two
+        // simultaneous first-run processes creating administrators. The final
+        // safety net is the UNIQUE constraint on users.email: if a second run
+        // using the same email races ahead, its insert is rejected (error 23505)
+        // and reported as "already created" below.
         await client.query('BEGIN');
 
         try {
@@ -256,11 +286,12 @@ async function createAdmin() {
             await client.query('COMMIT');
         } catch (error) {
             await client.query('ROLLBACK').catch(() => {});
+            if (error.code === '23505') {
+                console.log('An administrator was created by another process. No changes made.');
+                return;
+            }
             throw error;
         }
-
-        // Clear the local password variable after use.
-        password = '';
 
         console.log('');
         console.log('SUCCESS: Administrator account created.');
