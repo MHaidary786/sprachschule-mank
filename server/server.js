@@ -87,8 +87,8 @@ async function startServer() {
         console.log('Database connected successfully.');
         await initDB();
         console.log('Tables initialized.');
-        await ensureData();
-        console.log('Seeding complete (admin + demo data).');
+        // await ensureData();
+        // console.log('Seeding complete (admin + demo data).');
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
         });
